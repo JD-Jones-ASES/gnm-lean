@@ -162,11 +162,182 @@ theorem symInterval_neg (k : ℤ) : (symInterval k).image (fun x => -x) = symInt
     omega
   · intro hx
     exact ⟨-x, by omega, by omega⟩
+/-- A set with an element that another set lacks is a different set. -/
+private theorem ne_of_mem_notMem {α : Type*} [DecidableEq α] {s t : Finset α} {a : α}
+    (ha : a ∈ s) (ha' : a ∉ t) : s ≠ t := fun hst => ha' (hst ▸ ha)
+
+/-- Membership in an explicit triple, from an equation with one of its entries. -/
+private theorem mem_triple_of_eq {x a b c : ℤ} (h : x = a ∨ x = b ∨ x = c) :
+    x ∈ ({a, b, c} : Finset ℤ) := by
+  simp only [Finset.mem_insert, Finset.mem_singleton]
+  exact h
+
+/-- Two triples with no common entry are disjoint. -/
+private theorem triple_disjoint {x y z u v w : ℤ}
+    (hd : ∀ t : ℤ, (t = x ∨ t = y ∨ t = z) → (t = u ∨ t = v ∨ t = w) → False) :
+    Disjoint ({x, y, z} : Finset ℤ) ({u, v, w} : Finset ℤ) := by
+  refine Finset.disjoint_left.mpr ?_
+  intro t ht ht'
+  simp only [Finset.mem_insert, Finset.mem_singleton] at ht ht'
+  exact hd t ht ht'
+
+/-- A block of the first family is a block of the symmetric family. -/
+private theorem symmA_mem_symFamily {k i : ℤ} (hi : 0 ≤ i) (hik : i < k) :
+    symmA 0 k i ∈ symFamily k := by
+  unfold symFamily
+  exact Finset.mem_union_left _ (Finset.mem_image_of_mem _ (Finset.mem_Ico.mpr ⟨hi, hik⟩))
+
+/-- A block of the second family is a block of the symmetric family. -/
+private theorem symmB_mem_symFamily {k i : ℤ} (hi : 0 ≤ i) (hik : i < k) :
+    symmB 0 k i ∈ symFamily k := by
+  unfold symFamily
+  exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ (Finset.mem_Ico.mpr ⟨hi, hik⟩))
+
+/-- Two blocks of the first family with different indices are different. -/
+private theorem symmA_ne_symmA {k i j : ℤ} (hi : 0 ≤ i) (hik : i < k) (_hj : 0 ≤ j) (hjk : j < k)
+    (hij : i ≠ j) : symmA 0 k i ≠ symmA 0 k j := by
+  refine ne_of_mem_notMem (a := 0 + 1 + i) (mem_triple_of_eq (by omega)) ?_
+  simp only [symmA, Finset.mem_insert, Finset.mem_singleton]
+  omega
+
+/-- A block of the first family is never a block of the second. -/
+private theorem symmA_ne_symmB {k i j : ℤ} (hi : 0 ≤ i) (hik : i < k) (hj : 0 ≤ j) (hjk : j < k) :
+    symmA 0 k i ≠ symmB 0 k j := by
+  refine ne_of_mem_notMem (a := 0 + 1 + i) (mem_triple_of_eq (by omega)) ?_
+  simp only [symmB, Finset.mem_insert, Finset.mem_singleton]
+  omega
+
+/-- A triple is no block of the symmetric family as soon as it has two entries that no block of
+either family contains together. -/
+private theorem notMem_symFamily {k : ℤ} {c : Finset ℤ} {x y : ℤ} (hx : x ∈ c) (hy : y ∈ c)
+    (hA : ∀ i : ℤ, 0 ≤ i → i < k → ¬ (x ∈ symmA 0 k i ∧ y ∈ symmA 0 k i))
+    (hB : ∀ i : ℤ, 0 ≤ i → i < k → ¬ (x ∈ symmB 0 k i ∧ y ∈ symmB 0 k i)) :
+    c ∉ symFamily k := by
+  intro hc
+  unfold symFamily at hc
+  rcases Finset.mem_union.mp hc with hm | hm
+  · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hm
+    exact hA i (Finset.mem_Ico.mp hi).1 (Finset.mem_Ico.mp hi).2 ⟨hx, hy⟩
+  · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hm
+    exact hB i (Finset.mem_Ico.mp hi).1 (Finset.mem_Ico.mp hi).2 ⟨hx, hy⟩
+
+/-- A triple is the negation of no block of the symmetric family as soon as it has two entries
+whose negatives no block of either family contains together. -/
+private theorem notMem_negBlocks_symFamily {k : ℤ} {c : Finset ℤ} {x y : ℤ} (hx : x ∈ c)
+    (hy : y ∈ c)
+    (hA : ∀ i : ℤ, 0 ≤ i → i < k → ¬ (-x ∈ symmA 0 k i ∧ -y ∈ symmA 0 k i))
+    (hB : ∀ i : ℤ, 0 ≤ i → i < k → ¬ (-x ∈ symmB 0 k i ∧ -y ∈ symmB 0 k i)) :
+    c ∉ negBlocks (symFamily k) := by
+  intro hc
+  unfold negBlocks at hc
+  obtain ⟨b, hb, rfl⟩ := Finset.mem_image.mp hc
+  have hxb : -x ∈ b := mem_neg_image.mp hx
+  have hyb : -y ∈ b := mem_neg_image.mp hy
+  unfold symFamily at hb
+  rcases Finset.mem_union.mp hb with hm | hm
+  · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hm
+    exact hA i (Finset.mem_Ico.mp hi).1 (Finset.mem_Ico.mp hi).2 ⟨hxb, hyb⟩
+  · obtain ⟨i, hi, rfl⟩ := Finset.mem_image.mp hm
+    exact hB i (Finset.mem_Ico.mp hi).1 (Finset.mem_Ico.mp hi).2 ⟨hxb, hyb⟩
+
+/-- The block of the smallest entry of the symmetric family is the negation of no block of the
+family: it has one negative entry, so it could only be a negated block of the second family, and
+those are pinned down by their positive entries. -/
+private theorem symmA_zero_notMem_negBlocks {k : ℤ} (hk : 2 ≤ k) :
+    symmA 0 k 0 ∉ negBlocks (symFamily k) := by
+  refine notMem_negBlocks_symFamily (x := 1) (y := -(3 * k)) (mem_triple_of_eq (by omega))
+    (mem_triple_of_eq (by omega)) ?_ ?_
+  · rintro i hi hik ⟨h1, h2⟩
+    simp only [symmA, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+    omega
+  · rintro i hi hik ⟨h1, h2⟩
+    simp only [symmB, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+    omega
 
 /-- The symmetric family differs from its own negation: the block of the smallest entry is not the
 negation of any block of the family. -/
-theorem symFamily_ne_neg (k : ℤ) (hk : 2 ≤ k) : symFamily k ≠ negBlocks (symFamily k) := by
-  sorry
+theorem symFamily_ne_neg (k : ℤ) (hk : 2 ≤ k) : symFamily k ≠ negBlocks (symFamily k) :=
+  ne_of_mem_notMem (symmA_mem_symFamily (le_refl 0) (by omega))
+    (symmA_zero_notMem_negBlocks hk)
+
+/-- Replacing three blocks of a partition into zero-sum triples by three zero-sum triples with the
+same entries again partitions the same set: a local trade. -/
+private theorem zeroPartition_trade {s : Finset ℤ} {zs : Finset (Finset ℤ)}
+    (h : ZeroPartition s zs) {b₁ b₂ b₃ c₁ c₂ c₃ : Finset ℤ}
+    (hb₁ : b₁ ∈ zs) (hb₂ : b₂ ∈ zs) (hb₃ : b₃ ∈ zs)
+    (hcover : ∀ x : ℤ, (x ∈ b₁ ∨ x ∈ b₂ ∨ x ∈ b₃) ↔ (x ∈ c₁ ∨ x ∈ c₂ ∨ x ∈ c₃))
+    (hz₁ : c₁.card = 3 ∧ c₁.sum id = 0) (hz₂ : c₂.card = 3 ∧ c₂.sum id = 0)
+    (hz₃ : c₃.card = 3 ∧ c₃.sum id = 0)
+    (hd₁₂ : Disjoint c₁ c₂) (hd₁₃ : Disjoint c₁ c₃) (hd₂₃ : Disjoint c₂ c₃) :
+    ZeroPartition s ((zs \ {b₁, b₂, b₃}) ∪ {c₁, c₂, c₃}) := by
+  have hmemU : ∀ b : Finset ℤ, b ∈ (zs \ {b₁, b₂, b₃}) ∪ {c₁, c₂, c₃} ↔
+      ((b ∈ zs ∧ b ≠ b₁ ∧ b ≠ b₂ ∧ b ≠ b₃) ∨ (b = c₁ ∨ b = c₂ ∨ b = c₃)) := by
+    intro b
+    simp only [Finset.mem_union, Finset.mem_sdiff, Finset.mem_insert, Finset.mem_singleton,
+      not_or]
+    try tauto
+  have hcs : ∀ x : ℤ, (x ∈ c₁ ∨ x ∈ c₂ ∨ x ∈ c₃) → x ∈ s := by
+    intro x hx
+    rcases (hcover x).mpr hx with hx' | hx' | hx'
+    · exact h.subset hb₁ hx'
+    · exact h.subset hb₂ hx'
+    · exact h.subset hb₃ hx'
+  have hdisj : ∀ b ∈ zs, b ≠ b₁ → b ≠ b₂ → b ≠ b₃ →
+      ∀ c : Finset ℤ, (c = c₁ ∨ c = c₂ ∨ c = c₃) → Disjoint b c := by
+    intro b hbz hn₁ hn₂ hn₃ c hc
+    refine Finset.disjoint_left.mpr ?_
+    intro x hxb hxc
+    have hx : x ∈ c₁ ∨ x ∈ c₂ ∨ x ∈ c₃ := by
+      rcases hc with rfl | rfl | rfl
+      exacts [Or.inl hxc, Or.inr (Or.inl hxc), Or.inr (Or.inr hxc)]
+    rcases (hcover x).mpr hx with hx' | hx' | hx'
+    · exact Finset.disjoint_left.mp (h.2.1 b hbz b₁ hb₁ hn₁) hxb hx'
+    · exact Finset.disjoint_left.mp (h.2.1 b hbz b₂ hb₂ hn₂) hxb hx'
+    · exact Finset.disjoint_left.mp (h.2.1 b hbz b₃ hb₃ hn₃) hxb hx'
+  refine ⟨?_, ?_, ?_⟩
+  · ext x
+    simp only [Finset.mem_biUnion, id_eq]
+    constructor
+    · rintro ⟨b, hb, hxb⟩
+      rcases (hmemU b).mp hb with ⟨hbz, -, -, -⟩ | hc
+      · exact h.subset hbz hxb
+      · refine hcs x ?_
+        rcases hc with rfl | rfl | rfl
+        exacts [Or.inl hxb, Or.inr (Or.inl hxb), Or.inr (Or.inr hxb)]
+    · intro hx
+      rw [← h.1] at hx
+      obtain ⟨b, hbz, hxb⟩ := Finset.mem_biUnion.mp hx
+      by_cases hb : b = b₁ ∨ b = b₂ ∨ b = b₃
+      · have hxo : x ∈ b₁ ∨ x ∈ b₂ ∨ x ∈ b₃ := by
+          rcases hb with rfl | rfl | rfl
+          exacts [Or.inl hxb, Or.inr (Or.inl hxb), Or.inr (Or.inr hxb)]
+        rcases (hcover x).mp hxo with hx' | hx' | hx'
+        · exact ⟨c₁, (hmemU c₁).mpr (Or.inr (Or.inl rfl)), hx'⟩
+        · exact ⟨c₂, (hmemU c₂).mpr (Or.inr (Or.inr (Or.inl rfl))), hx'⟩
+        · exact ⟨c₃, (hmemU c₃).mpr (Or.inr (Or.inr (Or.inr rfl))), hx'⟩
+      · refine ⟨b, (hmemU b).mpr (Or.inl ⟨hbz, ?_, ?_, ?_⟩), hxb⟩ <;> tauto
+  · intro b hb c hc hbc
+    rcases (hmemU b).mp hb with ⟨hbz, hn₁, hn₂, hn₃⟩ | hbn
+    · rcases (hmemU c).mp hc with ⟨hcz, -, -, -⟩ | hcn
+      · exact h.2.1 b hbz c hcz hbc
+      · exact hdisj b hbz hn₁ hn₂ hn₃ c hcn
+    · rcases (hmemU c).mp hc with ⟨hcz, hm₁, hm₂, hm₃⟩ | hcn
+      · exact (hdisj c hcz hm₁ hm₂ hm₃ b hbn).symm
+      · rcases hbn with rfl | rfl | rfl <;> rcases hcn with rfl | rfl | rfl
+        · exact absurd rfl hbc
+        · exact hd₁₂
+        · exact hd₁₃
+        · exact hd₁₂.symm
+        · exact absurd rfl hbc
+        · exact hd₂₃
+        · exact hd₁₃.symm
+        · exact hd₂₃.symm
+        · exact absurd rfl hbc
+  · intro b hb
+    rcases (hmemU b).mp hb with ⟨hbz, -, -, -⟩ | hbn
+    · exact h.2.2 b hbz
+    · rcases hbn with rfl | rfl | rfl
+      exacts [hz₁, hz₂, hz₃]
 
 /-- The first trade, at `k = 3h`: the three blocks of the second family with indices `0`, `h` and
 `2h` are replaced by three other zero-sum triples on the same nine entries. -/
@@ -193,62 +364,305 @@ def tradeIII (h : ℤ) : Finset (Finset ℤ) :=
 /-- The first trade is a partition into zero-sum triples of the same centered interval. -/
 theorem tradeI_zeroPartition (h : ℤ) (hh : 1 ≤ h) :
     ZeroPartition (symInterval (3 * h)) (tradeI h) := by
-  sorry
+  have hb₁ : symmB 0 (3 * h) 0 ∈ symFamily (3 * h) := symmB_mem_symFamily (by omega) (by omega)
+  have hb₂ : symmB 0 (3 * h) h ∈ symFamily (3 * h) := symmB_mem_symFamily (by omega) (by omega)
+  have hb₃ : symmB 0 (3 * h) (2 * h) ∈ symFamily (3 * h) :=
+    symmB_mem_symFamily (by omega) (by omega)
+  unfold tradeI
+  refine zeroPartition_trade (symFamily_zeroPartition (3 * h) (by omega)) hb₁ hb₂ hb₃ ?_
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (triple_disjoint (by intro t ht ht'; omega)) (triple_disjoint (by intro t ht ht'; omega))
+    (triple_disjoint (by intro t ht ht'; omega))
+  intro x
+  simp only [symmB, Finset.mem_insert, Finset.mem_singleton]
+  omega
 
 /-- The first trade differs from the symmetric family. -/
 theorem tradeI_ne_family (h : ℤ) (hh : 1 ≤ h) : tradeI h ≠ symFamily (3 * h) := by
-  sorry
+  refine ne_of_mem_notMem (a := ({-(6 * h), -h, 7 * h} : Finset ℤ)) ?_ ?_
+  · unfold tradeI
+    exact Finset.mem_union_right _ (Finset.mem_insert_self _ _)
+  · refine notMem_symFamily (x := 7 * h) (y := -h) (mem_triple_of_eq (by omega))
+      (mem_triple_of_eq (by omega)) ?_ ?_
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmA, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmB, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
 
 /-- The first trade differs from the negation of the symmetric family. -/
 theorem tradeI_ne_neg (h : ℤ) (hh : 1 ≤ h) : tradeI h ≠ negBlocks (symFamily (3 * h)) := by
-  sorry
+  refine ne_of_mem_notMem (a := symmA 0 (3 * h) 0) ?_
+    (symmA_zero_notMem_negBlocks (by omega))
+  unfold tradeI
+  refine Finset.mem_union_left _ (Finset.mem_sdiff.mpr
+    ⟨symmA_mem_symFamily (by omega) (by omega), ?_⟩)
+  intro hmem
+  simp only [Finset.mem_insert, Finset.mem_singleton] at hmem
+  rcases hmem with heq | heq | heq <;>
+    exact symmA_ne_symmB (by omega) (by omega) (by omega) (by omega) heq
 
 /-- The second trade is a partition into zero-sum triples of the same centered interval. -/
 theorem tradeII_zeroPartition (h : ℤ) (hh : 1 ≤ h) :
     ZeroPartition (symInterval (3 * h + 1)) (tradeII h) := by
-  sorry
+  have hb₁ : symmA 0 (3 * h + 1) 0 ∈ symFamily (3 * h + 1) :=
+    symmA_mem_symFamily (by omega) (by omega)
+  have hb₂ : symmA 0 (3 * h + 1) (2 * h + 1) ∈ symFamily (3 * h + 1) :=
+    symmA_mem_symFamily (by omega) (by omega)
+  have hb₃ : symmB 0 (3 * h + 1) (h + 1) ∈ symFamily (3 * h + 1) :=
+    symmB_mem_symFamily (by omega) (by omega)
+  unfold tradeII
+  refine zeroPartition_trade (symFamily_zeroPartition (3 * h + 1) (by omega)) hb₁ hb₂ hb₃ ?_
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (triple_disjoint (by intro t ht ht'; omega)) (triple_disjoint (by intro t ht ht'; omega))
+    (triple_disjoint (by intro t ht ht'; omega))
+  intro x
+  simp only [symmA, symmB, Finset.mem_insert, Finset.mem_singleton]
+  omega
 
 /-- The second trade differs from the symmetric family. -/
 theorem tradeII_ne_family (h : ℤ) (hh : 1 ≤ h) : tradeII h ≠ symFamily (3 * h + 1) := by
-  sorry
+  refine ne_of_mem_notMem (a := ({-(5 * h + 1), 1, 5 * h} : Finset ℤ)) ?_ ?_
+  · unfold tradeII
+    exact Finset.mem_union_right _ (Finset.mem_insert_of_mem
+      (Finset.mem_insert_of_mem (Finset.mem_singleton_self _)))
+  · refine notMem_symFamily (x := 1) (y := 5 * h) (mem_triple_of_eq (by omega))
+      (mem_triple_of_eq (by omega)) ?_ ?_
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmA, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmB, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
 
-/-- The second trade differs from the negation of the symmetric family. -/
+/-- The second trade differs from the negation of the symmetric family: it keeps the block of the
+first family with index one, which is the negation of no block. -/
 theorem tradeII_ne_neg (h : ℤ) (hh : 1 ≤ h) : tradeII h ≠ negBlocks (symFamily (3 * h + 1)) := by
-  sorry
+  refine ne_of_mem_notMem (a := symmA 0 (3 * h + 1) 1) ?_ ?_
+  · unfold tradeII
+    refine Finset.mem_union_left _ (Finset.mem_sdiff.mpr
+      ⟨symmA_mem_symFamily (by omega) (by omega), ?_⟩)
+    intro hmem
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hmem
+    rcases hmem with heq | heq | heq
+    · exact symmA_ne_symmA (by omega) (by omega) (by omega) (by omega) (by omega) heq
+    · exact symmA_ne_symmA (by omega) (by omega) (by omega) (by omega) (by omega) heq
+    · exact symmA_ne_symmB (by omega) (by omega) (by omega) (by omega) heq
+  · refine notMem_negBlocks_symFamily (x := 0 + 1 + 1) (y := 9 * h)
+      (mem_triple_of_eq (by omega)) (mem_triple_of_eq (by omega)) ?_ ?_
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmA, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmB, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
 
 /-- The third trade is a partition into zero-sum triples of the same centered interval. -/
 theorem tradeIII_zeroPartition (h : ℤ) (hh : 2 ≤ h) :
     ZeroPartition (symInterval (3 * h + 2)) (tradeIII h) := by
-  sorry
+  have hb₁ : symmA 0 (3 * h + 2) h ∈ symFamily (3 * h + 2) :=
+    symmA_mem_symFamily (by omega) (by omega)
+  have hb₂ : symmB 0 (3 * h + 2) (2 * h + 2) ∈ symFamily (3 * h + 2) :=
+    symmB_mem_symFamily (by omega) (by omega)
+  have hb₃ : symmB 0 (3 * h + 2) (3 * h + 1) ∈ symFamily (3 * h + 2) :=
+    symmB_mem_symFamily (by omega) (by omega)
+  unfold tradeIII
+  refine zeroPartition_trade (symFamily_zeroPartition (3 * h + 2) (by omega)) hb₁ hb₂ hb₃ ?_
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (card_sum_triple (by omega) (by omega) (by omega) (by ring))
+    (triple_disjoint (by intro t ht ht'; omega)) (triple_disjoint (by intro t ht ht'; omega))
+    (triple_disjoint (by intro t ht ht'; omega))
+  intro x
+  simp only [symmA, symmB, Finset.mem_insert, Finset.mem_singleton]
+  omega
 
 /-- The third trade differs from the symmetric family. -/
 theorem tradeIII_ne_family (h : ℤ) (hh : 2 ≤ h) : tradeIII h ≠ symFamily (3 * h + 2) := by
-  sorry
+  refine ne_of_mem_notMem (a := ({-h, -1, h + 1} : Finset ℤ)) ?_ ?_
+  · unfold tradeIII
+    exact Finset.mem_union_right _ (Finset.mem_insert_of_mem
+      (Finset.mem_insert_of_mem (Finset.mem_singleton_self _)))
+  · refine notMem_symFamily (x := h + 1) (y := -1) (mem_triple_of_eq (by omega))
+      (mem_triple_of_eq (by omega)) ?_ ?_
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmA, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
+    · rintro i hi hik ⟨h1, h2⟩
+      simp only [symmB, Finset.mem_insert, Finset.mem_singleton] at h1 h2
+      omega
 
 /-- The third trade differs from the negation of the symmetric family. -/
-theorem tradeIII_ne_neg (h : ℤ) (hh : 2 ≤ h) : tradeIII h ≠ negBlocks (symFamily (3 * h + 2)) := by
-  sorry
+theorem tradeIII_ne_neg (h : ℤ) (hh : 2 ≤ h) :
+    tradeIII h ≠ negBlocks (symFamily (3 * h + 2)) := by
+  refine ne_of_mem_notMem (a := symmA 0 (3 * h + 2) 0) ?_
+    (symmA_zero_notMem_negBlocks (by omega))
+  unfold tradeIII
+  refine Finset.mem_union_left _ (Finset.mem_sdiff.mpr
+    ⟨symmA_mem_symFamily (by omega) (by omega), ?_⟩)
+  intro hmem
+  simp only [Finset.mem_insert, Finset.mem_singleton] at hmem
+  rcases hmem with heq | heq | heq
+  · exact symmA_ne_symmA (by omega) (by omega) (by omega) (by omega) (by omega) heq
+  · exact symmA_ne_symmB (by omega) (by omega) (by omega) (by omega) heq
+  · exact symmA_ne_symmB (by omega) (by omega) (by omega) (by omega) heq
+
+/-- The centered interval `[-15, 15]` with its centre removed, as an increasing list. -/
+private def frameList15 : List ℤ :=
+  [-15, -14, -13, -12, -11, -10, -9, -8, -7, -6, -5, -4, -3, -2, -1,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+/-- The centered interval `[-7, 7]`, as an increasing list. -/
+private def frameList7 : List ℤ := [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
+
+/-- Three partitions of the centered interval `[-15, 15]` with its centre removed, the one case the
+trades leave out. -/
+private theorem threeZero_sym_five : ThreeZero (symInterval 5) := by
+  have hs : frameList15.toFinset = symInterval 5 := by
+    ext x
+    simp only [frameList15, List.mem_toFinset, List.mem_cons, List.not_mem_nil, or_false,
+      symInterval, Finset.mem_erase, Finset.mem_Icc]
+    omega
+  exact ⟨toBlocksZ (zeroSum15 0), toBlocksZ (zeroSum15 1), toBlocksZ (zeroSum15 2),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList15) (by decide) (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList15) (by decide) (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList15) (by decide) (by decide) (by decide)⟩
 
 /-- Three pairwise distinct partitions of the centered interval with its centre removed, for every
 `k ≥ 3`. -/
 theorem threeZero_sym (k : ℤ) (hk : 3 ≤ k) : ThreeZero (symInterval k) := by
-  sorry
+  have hfam := symFamily_zeroPartition k (by omega)
+  have hneg : ZeroPartition (symInterval k) (negBlocks (symFamily k)) := by
+    have hn := ZeroPartition.negBlocks (symFamily_zeroPartition k (by omega))
+    rwa [symInterval_neg] at hn
+  rcases (by omega : k % 3 = 0 ∨ k % 3 = 1 ∨ k % 3 = 2) with hm | hm | hm
+  · obtain ⟨j, rfl⟩ : ∃ j : ℤ, k = 3 * j := ⟨k / 3, by omega⟩
+    exact ⟨symFamily (3 * j), negBlocks (symFamily (3 * j)), tradeI j, hfam, hneg,
+      tradeI_zeroPartition j (by omega), symFamily_ne_neg (3 * j) (by omega),
+      (tradeI_ne_family j (by omega)).symm, (tradeI_ne_neg j (by omega)).symm⟩
+  · obtain ⟨j, rfl⟩ : ∃ j : ℤ, k = 3 * j + 1 := ⟨(k - 1) / 3, by omega⟩
+    exact ⟨symFamily (3 * j + 1), negBlocks (symFamily (3 * j + 1)), tradeII j, hfam, hneg,
+      tradeII_zeroPartition j (by omega), symFamily_ne_neg (3 * j + 1) (by omega),
+      (tradeII_ne_family j (by omega)).symm, (tradeII_ne_neg j (by omega)).symm⟩
+  · by_cases h5 : k = 5
+    · subst h5
+      exact threeZero_sym_five
+    · obtain ⟨j, rfl⟩ : ∃ j : ℤ, k = 3 * j + 2 := ⟨(k - 2) / 3, by omega⟩
+      exact ⟨symFamily (3 * j + 2), negBlocks (symFamily (3 * j + 2)), tradeIII j, hfam, hneg,
+        tradeIII_zeroPartition j (by omega), symFamily_ne_neg (3 * j + 2) (by omega),
+        (tradeIII_ne_family j (by omega)).symm, (tradeIII_ne_neg j (by omega)).symm⟩
+
+/-- Adjoining one block absent from both families to two different families keeps them
+different. -/
+private theorem eq_of_union_singleton_eq {z₁ z₂ : Finset (Finset ℤ)} {c : Finset ℤ}
+    (hc₁ : c ∉ z₁) (hc₂ : c ∉ z₂) (hz : z₁ ∪ {c} = z₂ ∪ {c}) : z₁ = z₂ := by
+  ext b
+  constructor
+  · intro hb
+    have hb' : b ∈ z₂ ∪ {c} := by rw [← hz]; exact Finset.mem_union_left _ hb
+    rcases Finset.mem_union.mp hb' with hb'' | hb''
+    · exact hb''
+    · rw [Finset.mem_singleton] at hb''
+      subst hb''
+      exact absurd hb hc₁
+  · intro hb
+    have hb' : b ∈ z₁ ∪ {c} := by rw [hz]; exact Finset.mem_union_left _ hb
+    rcases Finset.mem_union.mp hb' with hb'' | hb''
+    · exact hb''
+    · rw [Finset.mem_singleton] at hb''
+      subst hb''
+      exact absurd hb hc₂
 
 /-- Three symmetric frames at the two offsets built from a symmetric interval: the offset `3k`, and
 the offset `3k + 1` after appending the triple through the centre. -/
 theorem threeFrameA_of_threeZero_sym {k : ℤ} (hk : 0 ≤ k) (h : ThreeZero (symInterval k)) :
     ThreeFrameA (3 * k) ∧ ThreeFrameA (3 * k + 1) := by
-  sorry
+  have hset0 : frameSet (3 * k) = symInterval k := by
+    rw [frameSet, if_pos (by omega : (3 * k) % 3 = 0)]
+    rfl
+  have hset1 : frameSet (3 * k + 1) = Finset.Icc (-(3 * k + 1)) (3 * k + 1) := by
+    rw [frameSet, if_neg (by omega : ¬ (3 * k + 1) % 3 = 0)]
+  refine ⟨?_, ?_⟩
+  · show ThreeZero (frameSet (3 * k))
+    rw [hset0]
+    exact h
+  · obtain ⟨z₁, z₂, z₃, h₁, h₂, h₃, h₁₂, h₁₃, h₂₃⟩ := h
+    have hcz : ZeroPartition ({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)
+        {({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)} :=
+      zeroPartition_single_triple (by omega) (by omega) (by omega) (by ring)
+    have hdisj : Disjoint (symInterval k) ({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ) := by
+      refine Finset.disjoint_left.mpr ?_
+      intro x hx hx'
+      simp only [symInterval, Finset.mem_erase, Finset.mem_Icc] at hx
+      simp only [Finset.mem_insert, Finset.mem_singleton] at hx'
+      omega
+    have hunion : symInterval k ∪ ({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ) =
+        Finset.Icc (-(3 * k + 1)) (3 * k + 1) := by
+      ext x
+      simp only [Finset.mem_union, symInterval, Finset.mem_erase, Finset.mem_Icc,
+        Finset.mem_insert, Finset.mem_singleton]
+      omega
+    have hpart : ∀ z : Finset (Finset ℤ), ZeroPartition (symInterval k) z →
+        ZeroPartition (Finset.Icc (-(3 * k + 1)) (3 * k + 1))
+          (z ∪ {({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)}) := by
+      intro z hz
+      have hu := hz.union hcz hdisj
+      rwa [hunion] at hu
+    have hnotmem : ∀ z : Finset (Finset ℤ), ZeroPartition (symInterval k) z →
+        ({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ) ∉ z := by
+      intro z hz hcm
+      have hmem := hz.subset hcm (mem_triple_of_eq (x := (0 : ℤ)) (by omega))
+      simp only [symInterval, Finset.mem_erase] at hmem
+      exact hmem.1 rfl
+    show ThreeZero (frameSet (3 * k + 1))
+    rw [hset1]
+    refine ⟨z₁ ∪ {({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)},
+      z₂ ∪ {({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)},
+      z₃ ∪ {({-(3 * k + 1), 0, 3 * k + 1} : Finset ℤ)},
+      hpart z₁ h₁, hpart z₂ h₂, hpart z₃ h₃, ?_, ?_, ?_⟩
+    · exact fun he => h₁₂ (eq_of_union_singleton_eq (hnotmem z₁ h₁) (hnotmem z₂ h₂) he)
+    · exact fun he => h₁₃ (eq_of_union_singleton_eq (hnotmem z₁ h₁) (hnotmem z₃ h₃) he)
+    · exact fun he => h₂₃ (eq_of_union_singleton_eq (hnotmem z₂ h₂) (hnotmem z₃ h₃) he)
 
 /-- Three symmetric frames at offset seven. -/
 theorem threeFrameA_seven : ThreeFrameA 7 := by
-  sorry
+  have hset : frameSet 7 = Finset.Icc (-7 : ℤ) 7 := by
+    rw [frameSet, if_neg (by decide : ¬ ((7 : ℤ) % 3 = 0))]
+  have hs : frameList7.toFinset = Finset.Icc (-7 : ℤ) 7 := by
+    ext x
+    simp only [frameList7, List.mem_toFinset, List.mem_cons, List.not_mem_nil, or_false,
+      Finset.mem_Icc]
+    omega
+  show ThreeZero (frameSet 7)
+  rw [hset]
+  exact ⟨toBlocksZ (zeroSum7 0), toBlocksZ (zeroSum7 1), toBlocksZ (zeroSum7 2),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    zeroPartition_of_framesOK hs (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList7) (by decide) (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList7) (by decide) (by decide) (by decide),
+    toBlocksZ_ne_of_differZ (support := frameList7) (by decide) (by decide) (by decide)⟩
 
 /-- Three symmetric frames at every offset from seven on that is congruent to zero or one modulo
 three. -/
 theorem threeFrameA_of_mod (r : ℤ) (hr : 7 ≤ r) (hmod : r % 3 = 0 ∨ r % 3 = 1) :
     ThreeFrameA r := by
-  sorry
+  by_cases h7 : r = 7
+  · subst h7
+    exact threeFrameA_seven
+  · rcases hmod with hm | hm
+    · obtain ⟨k, rfl⟩ : ∃ k : ℤ, r = 3 * k := ⟨r / 3, by omega⟩
+      exact (threeFrameA_of_threeZero_sym (by omega) (threeZero_sym k (by omega))).1
+    · obtain ⟨k, rfl⟩ : ∃ k : ℤ, r = 3 * k + 1 := ⟨(r - 1) / 3, by omega⟩
+      exact (threeFrameA_of_threeZero_sym (by omega) (threeZero_sym k (by omega))).2
 
 end
 
