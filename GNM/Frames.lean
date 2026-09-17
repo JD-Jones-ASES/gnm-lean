@@ -43,34 +43,129 @@ theorem signedFrame_zeroPartition {k j a : ℤ} {σ : ℤ → ℤ} (hk : 0 ≤ k
     (ha' : a ≤ 3 * k + 1) (haj : a = 3 * j + 1 ∨ a = -(3 * j + 1))
     (hσ : DisplacementPermutation k j σ) :
     ZeroPartition (signedVertices (3 * k + 2) a) (signedFrame k j a σ) := by
-  sorry
+  have hh := zeroPartition_hole_of_displacement haj hσ
+  have ht := zeroPartition_single_triple (x := a) (y := 3 * k + 2) (z := -(3 * k + 2 + a))
+    (by omega) (by omega) (by omega) (by ring)
+  have hd : Disjoint (holeVertices k a) ({a, 3 * k + 2, -(3 * k + 2 + a)} : Finset ℤ) := by
+    apply Finset.disjoint_left.mpr
+    intro x hx hy
+    rw [mem_holeVertices] at hx
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hy
+    omega
+  have h := hh.union ht hd
+  rw [hole_union_critical hk ha ha'] at h
+  exact h
 
 /-- Two displacement permutations that differ at a point of their domain give different frames: the
 triple of that point carries the only residue-one entry it could carry. -/
 theorem signedFrame_ne {k j a : ℤ} {σ σ' : ℤ → ℤ} (hσ : DisplacementPermutation k j σ)
     (hσ' : DisplacementPermutation k j σ') {u : ℤ} (hu : u ∈ displacementDomain k j)
     (hne : σ u ≠ σ' u) : signedFrame k j a σ ≠ signedFrame k j a σ' := by
-  sorry
+  intro heq
+  have hmem : residueTriple σ u ∈ signedFrame k j a σ :=
+    Finset.mem_union_left _ (Finset.mem_image_of_mem _ hu)
+  rw [heq] at hmem
+  rcases Finset.mem_union.mp hmem with h | h
+  · obtain ⟨v, _, hvu⟩ := Finset.mem_image.mp h
+    have h1 : (3 * u + 1 : ℤ) ∈ residueTriple σ' v := by
+      rw [hvu]
+      simp only [residueTriple]
+      exact Finset.mem_insert_self _ _
+    have hvu' : v = u := by
+      simp only [residueTriple, Finset.mem_insert, Finset.mem_singleton] at h1
+      rcases h1 with h | h | h <;> omega
+    rw [hvu'] at hvu
+    have h2 : (-(3 * σ u + 1) : ℤ) ∈ residueTriple σ' u := by
+      rw [hvu]
+      simp only [residueTriple]
+      exact Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)
+    simp only [residueTriple, Finset.mem_insert, Finset.mem_singleton] at h2
+    rcases h2 with h | h | h
+    · omega
+    · exact hne (by omega)
+    · omega
+  · have h3 : (3 * k + 2 : ℤ) ∈ residueTriple σ u := by
+      rw [Finset.mem_singleton.mp h]
+      exact Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)
+    have hv := hσ.1.mapsTo hu
+    have hv' : -k ≤ σ u ∧ σ u ≤ k ∧ σ u ≠ j := by
+      simpa only [Finset.mem_coe, mem_displacementDomain] using hv
+    simp only [residueTriple, Finset.mem_insert, Finset.mem_singleton] at h3
+    omega
 
 /-- Three displacement permutations give three distinct signed frames. -/
 theorem threeFrames_of_threeDisp {k j a : ℤ} (hk : 0 ≤ k) (ha : 1 ≤ a) (ha' : a ≤ 3 * k + 1)
     (haj : a = 3 * j + 1 ∨ a = -(3 * j + 1)) (h : ThreeDisp k j) : ThreeFrames (3 * k + 2) a := by
-  sorry
+  obtain ⟨σ₁, σ₂, σ₃, h₁, h₂, h₃, ⟨x₁₂, hx₁₂, hne₁₂⟩, ⟨x₁₃, hx₁₃, hne₁₃⟩, ⟨x₂₃, hx₂₃, hne₂₃⟩⟩ := h
+  have d₁ := (displacementPermutation_iff k j σ₁).mpr h₁
+  have d₂ := (displacementPermutation_iff k j σ₂).mpr h₂
+  have d₃ := (displacementPermutation_iff k j σ₃).mpr h₃
+  exact ⟨signedFrame k j a σ₁, signedFrame k j a σ₂, signedFrame k j a σ₃,
+    signedFrame_zeroPartition hk ha ha' haj d₁, signedFrame_zeroPartition hk ha ha' haj d₂,
+    signedFrame_zeroPartition hk ha ha' haj d₃, signedFrame_ne d₁ d₂ hx₁₂ hne₁₂,
+    signedFrame_ne d₁ d₃ hx₁₃ hne₁₃, signedFrame_ne d₂ d₃ hx₂₃ hne₂₃⟩
+
+/-- Three checked lists of triples on a common support give three pairwise distinct partitions of
+that support into zero-sum triples. -/
+private theorem threeZero_of_tables (s : Finset ℤ) (support : List ℤ)
+    (b₀ b₁ b₂ : List (List ℤ)) (hs : support.toFinset = s) (hnd : nodupZ support = true)
+    (h₀ : framesOK support b₀ = true) (h₁ : framesOK support b₁ = true)
+    (h₂ : framesOK support b₂ = true) (d₀₁ : differZ b₀ b₁ = true)
+    (d₀₂ : differZ b₀ b₂ = true) (d₁₂ : differZ b₁ b₂ = true) : ThreeZero s :=
+  ⟨toBlocksZ b₀, toBlocksZ b₁, toBlocksZ b₂, zeroPartition_of_framesOK hs hnd h₀,
+    zeroPartition_of_framesOK hs hnd h₁, zeroPartition_of_framesOK hs hnd h₂,
+    toBlocksZ_ne_of_differZ h₀ h₁ d₀₁, toBlocksZ_ne_of_differZ h₀ h₂ d₀₂,
+    toBlocksZ_ne_of_differZ h₁ h₂ d₁₂⟩
 
 /-- Three signed frames at offset eleven for every partner not divisible by three. -/
 theorem threeFrames_eleven {a : ℤ} (ha : 1 ≤ a) (ha' : a ≤ 10) (ha3 : ¬ (3 : ℤ) ∣ a) :
     ThreeFrames 11 a := by
-  sorry
+  unfold ThreeFrames
+  interval_cases a
+  · exact threeZero_of_tables _ (flatZ (frame11 1 0)) (frame11 1 0) (frame11 1 1) (frame11 1 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact threeZero_of_tables _ (flatZ (frame11 2 0)) (frame11 2 0) (frame11 2 1) (frame11 2 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact absurd (by norm_num : (3 : ℤ) ∣ 3) ha3
+  · exact threeZero_of_tables _ (flatZ (frame11 4 0)) (frame11 4 0) (frame11 4 1) (frame11 4 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact threeZero_of_tables _ (flatZ (frame11 5 0)) (frame11 5 0) (frame11 5 1) (frame11 5 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact absurd (by norm_num : (3 : ℤ) ∣ 6) ha3
+  · exact threeZero_of_tables _ (flatZ (frame11 7 0)) (frame11 7 0) (frame11 7 1) (frame11 7 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact threeZero_of_tables _ (flatZ (frame11 8 0)) (frame11 8 0) (frame11 8 1) (frame11 8 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
+  · exact absurd (by norm_num : (3 : ℤ) ∣ 9) ha3
+  · exact threeZero_of_tables _ (flatZ (frame11 10 0)) (frame11 10 0) (frame11 10 1) (frame11 10 2)
+      (by decide) (by decide) (by decide) (by decide)
+      (by decide) (by decide) (by decide) (by decide)
 
 /-- Three signed frames at offset eight with partner one. -/
 theorem threeFrames_eight_one : ThreeFrames 8 1 := by
-  sorry
+  unfold ThreeFrames
+  exact threeZero_of_tables _ (flatZ (frame81 0)) (frame81 0) (frame81 1) (frame81 2)
+    (by decide) (by decide) (by decide) (by decide)
+    (by decide) (by decide) (by decide) (by decide)
 
 /-- Three signed frames at every offset congruent to two modulo three from eleven on, for every
 partner not divisible by three. -/
 theorem threeFrames_of_mod {r a : ℤ} (hr : 11 ≤ r) (hmod : r % 3 = 2) (ha : 1 ≤ a) (ha' : a < r)
     (ha3 : ¬ (3 : ℤ) ∣ a) : ThreeFrames r a := by
-  sorry
+  by_cases h11 : r = 11
+  · subst h11
+    exact threeFrames_eleven ha (by omega) ha3
+  · obtain ⟨k, hrk⟩ : ∃ k : ℤ, r = 3 * k + 2 := ⟨(r - 2) / 3, by omega⟩
+    have hk4 : 4 ≤ k := by omega
+    obtain ⟨j, hj1, hj2, haj⟩ := exists_residue_hole (by omega : (0 : ℤ) ≤ k) ha (by omega) ha3
+    rw [hrk]
+    exact threeFrames_of_threeDisp (by omega) ha (by omega) haj (threeDisp_all hk4 ⟨hj1, hj2⟩)
 
 /-- The centered interval `[-3k, 3k]` with its centre removed. -/
 def symInterval (k : ℤ) : Finset ℤ := (Finset.Icc (-(3 * k)) (3 * k)).erase 0
