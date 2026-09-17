@@ -1,0 +1,13 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "GNM.count_eq_one_iff",
+    "GNM.count_eq_two_iff",
+    "GNM.three_le_count_iff",
+    "GNM.count_eq_two_of_add_six"
+  ],
+  "definition_names": ["GNM.IsGoodPartition", "GNM.count", "GNM.Nu", "GNM.E2"],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}
