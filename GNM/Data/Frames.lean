@@ -1,12 +1,10 @@
-import Mathlib
-
 namespace GNM
 
 /-- Three partitions into zero-sum triples of the vertex set
 `[1, 11] ∪ {-x : x ∈ [1, 10], x ≠ a} ∪ {-(11 + a)}`, for each `a` with `1 ≤ a ≤ 10`:
 `frame11 a i` is the `i`-th of them for `i < 3`, a list of triples, each triple
 increasing. Outside that range the list is empty. -/
-def frame11 : ℕ → ℕ → List (List ℤ)
+def frame11 : Nat → Nat → List (List Int)
   | 1, 0 => [[-12, 2, 10], [-10, 4, 6], [-9, 1, 8], [-8, 3, 5], [-7, -4, 11], [-6, -3, 9],
     [-5, -2, 7]]
   | 1, 1 => [[-12, 2, 10], [-10, 4, 6], [-9, 1, 8], [-8, 3, 5], [-7, -2, 9], [-6, -5, 11],
@@ -72,7 +70,7 @@ def frame11 : ℕ → ℕ → List (List ℤ)
 /-- Three partitions into zero-sum triples of the vertex set
 `[1, 8] ∪ {-x : x ∈ [1, 7], x ≠ 1} ∪ {-9}`: `frame81 i` is the `i`-th of them for
 `i < 3`, a list of triples, each triple increasing. Outside that range the list is empty. -/
-def frame81 : ℕ → List (List ℤ)
+def frame81 : Nat → List (List Int)
   | 0 => [[-9, 3, 6], [-7, 2, 5], [-6, -2, 8], [-5, 1, 4], [-4, -3, 7]]
   | 1 => [[-9, 4, 5], [-7, 1, 6], [-6, -2, 8], [-5, 2, 3], [-4, -3, 7]]
   | 2 => [[-9, 2, 7], [-7, 3, 4], [-6, 1, 5], [-5, -3, 8], [-4, -2, 6]]
@@ -81,7 +79,7 @@ def frame81 : ℕ → List (List ℤ)
 /-- Three partitions of the symmetric interval `[-7, 7]`, zero included, into zero-sum
 triples: `zeroSum7 i` is the `i`-th of them for `i < 3`, a list of triples, each triple
 increasing. Outside that range the list is empty. -/
-def zeroSum7 : ℕ → List (List ℤ)
+def zeroSum7 : Nat → List (List Int)
   | 0 => [[-7, 1, 6], [-6, -1, 7], [-5, 2, 3], [-4, 0, 4], [-3, -2, 5]]
   | 1 => [[-7, 1, 6], [-6, 2, 4], [-5, 0, 5], [-4, -3, 7], [-2, -1, 3]]
   | 2 => [[-7, 1, 6], [-6, 2, 4], [-5, -2, 7], [-4, -1, 5], [-3, 0, 3]]
@@ -90,7 +88,7 @@ def zeroSum7 : ℕ → List (List ℤ)
 /-- Three partitions of the symmetric interval `[-15, 15]` with zero removed into
 zero-sum triples: `zeroSum15 i` is the `i`-th of them for `i < 3`, a list of triples, each
 triple increasing. Outside that range the list is empty. -/
-def zeroSum15 : ℕ → List (List ℤ)
+def zeroSum15 : Nat → List (List Int)
   | 0 => [[-15, 1, 14], [-14, 2, 12], [-13, 3, 10], [-12, 4, 8], [-11, 5, 6], [-10, -5, 15],
     [-9, -4, 13], [-8, -3, 11], [-7, -2, 9], [-6, -1, 7]]
   | 1 => [[-15, 1, 14], [-14, 2, 12], [-13, 3, 10], [-12, 4, 8], [-11, 5, 6], [-10, -3, 13],

@@ -1,12 +1,10 @@
-import Mathlib
-
 namespace GNM
 
 /-- Explicit good partitions of `{1, …, n}` for `n ≤ 86`: three at every `n` outside the
 exceptional set, and the complete list at every exceptional `n`; their correctness and, where
 stated, their completeness are established by kernel-checked computations in the modules that use
 them. -/
-def baseWitnesses : ℕ → List (List (List ℕ))
+def baseWitnesses : Nat → List (List (List Nat))
   | 1 => [[[1]]]
   | 2 => [[[2, 1]]]
   | 3 => [[[3], [2, 1]]]

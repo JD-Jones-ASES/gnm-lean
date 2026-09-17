@@ -1,5 +1,3 @@
-import Mathlib
-
 namespace GNM
 
 /-- Positional tables of displacement permutations, in the convention of
@@ -11,7 +9,7 @@ value of `[-k, k]` exactly once; the entry at the hole index `u = j` carries `j 
 Outside that range the list is empty. The three permutations listed at each `(k, j)` are
 distinct, and every property claimed of these tables is established by kernel-checked
 computations in the modules that use them. -/
-noncomputable def permWitness : ℕ → ℕ → ℕ → List ℤ
+noncomputable def permWitness : Nat → Nat → Nat → List Int
   | 4, 0, 0 => [2, 4, 1, 8, 5, 9, 3, 7, 6]
   | 4, 0, 1 => [2, 4, 7, 1, 5, 9, 3, 6, 8]
   | 4, 0, 2 => [2, 1, 6, 8, 5, 3, 9, 4, 7]
