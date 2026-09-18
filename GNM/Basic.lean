@@ -324,28 +324,115 @@ theorem pow_three_eq_of_lt {u t : ℕ} (h1 : 3 ^ t ≤ 3 ^ u) (h2 : 3 ^ u < 3 * 
 /-- Above the fourth power, membership of `3^t + r` in `N_u` is decided by the offset alone. -/
 theorem nu_add_iff {t r : ℕ} (ht : 4 ≤ t) (hr : 2 * r < 3 ^ t) :
     Nu (3 ^ t + r) ↔ (r = 0 ∨ r = 1 ∨ r = 2 ∨ r = 3 ∨ r = 5) := by
-  sorry
+  obtain ⟨-, h9t, -⟩ := pow_three_nine (show 2 ≤ t by omega)
+  have hmono : (3 : ℕ) ^ 4 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+  have hlit : (3 : ℕ) ^ 4 = 81 := by norm_num
+  constructor
+  · rintro (h | h | h | h | ⟨u, hu, hN⟩)
+    · omega
+    · omega
+    · omega
+    · omega
+    · obtain ⟨-, h9u, -⟩ := pow_three_nine hu
+      have hut : u = t := by
+        refine pow_three_eq_of_lt ?_ ?_
+        · rcases hN with h | h | h | h | h | h | h | h <;> omega
+        · rcases hN with h | h | h | h | h | h | h | h <;> omega
+      subst hut
+      rcases hN with h | h | h | h | h | h | h | h <;> omega
+  · intro h
+    refine Or.inr (Or.inr (Or.inr (Or.inr ⟨t, by omega, ?_⟩)))
+    rcases h with rfl | rfl | rfl | rfl | rfl <;> omega
 
 /-- No `3^t + r` with a small offset lies in `E_2`. -/
 theorem not_e2_add {t r : ℕ} (ht : 4 ≤ t) (hr : 2 * r < 3 ^ t) : ¬ E2 (3 ^ t + r) := by
-  sorry
+  obtain ⟨-, h9t, -⟩ := pow_three_nine (show 2 ≤ t by omega)
+  have hmono : (3 : ℕ) ^ 4 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+  have hlit : (3 : ℕ) ^ 4 = 81 := by norm_num
+  rintro (h | ⟨u, hu, hE⟩ | ⟨u, hu, hE⟩)
+  · omega
+  · obtain ⟨-, h9u, -⟩ := pow_three_nine hu
+    have hut : u = t := pow_three_eq_of_lt (by omega) (by omega)
+    subst hut
+    omega
+  · obtain ⟨-, h9u, -⟩ := pow_three_nine (show 2 ≤ u by omega)
+    have hut : u = t := pow_three_eq_of_lt (by omega) (by omega)
+    subst hut
+    omega
 
 /-- Above the fourth power, membership of `3^t − r` in `N_u` is decided by the offset alone. -/
 theorem nu_sub_iff {t r n : ℕ} (ht : 4 ≤ t) (hr : 1 ≤ r) (h2 : 2 * r < 3 ^ t)
     (hn : n + r = 3 ^ t) : Nu n ↔ (r = 1 ∨ r = 2 ∨ r = 4) := by
-  sorry
+  obtain ⟨-, h9t, -⟩ := pow_three_nine (show 2 ≤ t by omega)
+  have hmono : (3 : ℕ) ^ 4 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+  have hlit : (3 : ℕ) ^ 4 = 81 := by norm_num
+  constructor
+  · rintro (h | h | h | h | ⟨u, hu, hN⟩)
+    · omega
+    · omega
+    · omega
+    · omega
+    · obtain ⟨-, h9u, -⟩ := pow_three_nine hu
+      have hut : t = u := by
+        refine pow_three_eq_of_lt (u := t) (t := u) ?_ ?_
+        · rcases hN with h | h | h | h | h | h | h | h <;> omega
+        · rcases hN with h | h | h | h | h | h | h | h <;> omega
+      subst hut
+      rcases hN with h | h | h | h | h | h | h | h <;> omega
+  · intro h
+    refine Or.inr (Or.inr (Or.inr (Or.inr ⟨t, by omega, ?_⟩)))
+    rcases h with rfl | rfl | rfl <;> omega
 
 /-- Above the fourth power, membership of `3^t − r` in `E_2` is decided by the offset alone. -/
 theorem e2_sub_iff {t r n : ℕ} (ht : 4 ≤ t) (hr : 1 ≤ r) (h2 : 2 * r < 3 ^ t)
     (hn : n + r = 3 ^ t) : E2 n ↔ (r = 3 ∨ r = 6) := by
-  sorry
+  obtain ⟨-, h9t, -⟩ := pow_three_nine (show 2 ≤ t by omega)
+  have hmono : (3 : ℕ) ^ 4 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+  have hlit : (3 : ℕ) ^ 4 = 81 := by norm_num
+  constructor
+  · rintro (h | ⟨u, hu, hE⟩ | ⟨u, hu, hE⟩)
+    · omega
+    · obtain ⟨-, h9u, -⟩ := pow_three_nine hu
+      have hut : t = u := pow_three_eq_of_lt (u := t) (t := u) (by omega) (by omega)
+      subst hut
+      omega
+    · obtain ⟨-, h9u, -⟩ := pow_three_nine (show 2 ≤ u by omega)
+      have hut : t = u := pow_three_eq_of_lt (u := t) (t := u) (by omega) (by omega)
+      subst hut
+      omega
+  · intro h
+    rcases h with rfl | rfl
+    · exact Or.inr (Or.inl ⟨t, by omega, by omega⟩)
+    · exact Or.inr (Or.inr ⟨t, by omega, by omega⟩)
 
 /-- A member of the exceptional set at least `33` is `3^s − e` with `e ∈ {1, 2, 3, 4, 6}` or `3^s +
 c` with `c ∈ {0, 1, 2, 3, 5}`, for some `s ≥ 4`. -/
 theorem exceptional_form {m : ℕ} (hm : 33 ≤ m) (h : Nu m ∨ E2 m) :
     ∃ s : ℕ, 4 ≤ s ∧ ((∃ e, (e = 1 ∨ e = 2 ∨ e = 3 ∨ e = 4 ∨ e = 6) ∧ m + e = 3 ^ s) ∨
       (∃ c, (c = 0 ∨ c = 1 ∨ c = 2 ∨ c = 3 ∨ c = 5) ∧ m = 3 ^ s + c)) := by
-  sorry
+  have key : ∀ u : ℕ, 28 ≤ 3 ^ u → 4 ≤ u := by
+    intro u hu
+    by_contra hc
+    have h27 : (3 : ℕ) ^ u ≤ 3 ^ 3 := Nat.pow_le_pow_right (by norm_num) (by omega)
+    have hlit : (3 : ℕ) ^ 3 = 27 := by norm_num
+    omega
+  rcases h with (h | h | h | h | ⟨u, hu, hN⟩) | (h | ⟨u, hu, hE⟩ | ⟨u, hu, hE⟩)
+  · omega
+  · omega
+  · omega
+  · omega
+  · rcases hN with h | h | h | h | h | h | h | h
+    · exact ⟨u, key u (by omega), Or.inl ⟨4, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inl ⟨2, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inl ⟨1, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inr ⟨0, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inr ⟨1, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inr ⟨2, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inr ⟨3, by omega, by omega⟩⟩
+    · exact ⟨u, key u (by omega), Or.inr ⟨5, by omega, by omega⟩⟩
+  · omega
+  · exact ⟨u, key u (by omega), Or.inl ⟨3, by omega, by omega⟩⟩
+  · exact ⟨u, key u (by omega), Or.inl ⟨6, by omega, by omega⟩⟩
 
 end
 
