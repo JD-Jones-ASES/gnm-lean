@@ -27,15 +27,15 @@ theorem three_le_count_of_threeOK {n : ℕ} (h : threeOK n = true) : 3 ≤ count
   exact three_le_count_of_witnesses c0 c1 c2 d01 d02 d12
 
 /-- One good tabulated partition and an accepting search give a count of one. -/
-theorem count_eq_one_of_oneOK {n : ℕ} (h : oneOK n = true) (hs : search n [wAt n 0] = true) :
-    count n = 1 :=
-  count_eq_one_of_search h hs
+theorem count_eq_one_of_oneOK {n : ℕ} (hn : 3 * n < 729) (h : oneOK n = true)
+    (hs : search n [wAt n 0] = true) : count n = 1 :=
+  count_eq_one_of_search hn h hs
 
 /-- Two good, different tabulated partitions and an accepting search give a count of two. -/
-theorem count_eq_two_of_twoOK {n : ℕ} (h : twoOK n = true)
+theorem count_eq_two_of_twoOK {n : ℕ} (hn : 3 * n < 729) (h : twoOK n = true)
     (hs : search n [wAt n 0, wAt n 1] = true) : count n = 2 := by
   obtain ⟨c0, c1, d01⟩ := twoOK_facts h
-  exact count_eq_two_of_search c0 c1 d01 hs
+  exact count_eq_two_of_search hn c0 c1 d01 hs
 
 /-- Three good partitions at every value from 1 to 10 outside the two exceptional sets. -/
 private theorem three_le_count_of_le_10 (n : ℕ) (hlo : 1 ≤ n) (hhi : n ≤ 10)
@@ -209,31 +209,31 @@ theorem count_eq_one_small :
   simp only [Finset.mem_insert, Finset.mem_singleton] at hn
   rcases hn with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
     rfl | rfl | rfl
-  · exact count_eq_one_of_oneOK one_ok_1 search_one_1
-  · exact count_eq_one_of_oneOK one_ok_2 search_one_2
-  · exact count_eq_one_of_oneOK one_ok_3 search_one_3
-  · exact count_eq_one_of_oneOK one_ok_4 search_one_4
-  · exact count_eq_one_of_oneOK one_ok_5 search_one_5
-  · exact count_eq_one_of_oneOK one_ok_7 search_one_7
-  · exact count_eq_one_of_oneOK one_ok_8 search_one_8
-  · exact count_eq_one_of_oneOK one_ok_9 search_one_9
-  · exact count_eq_one_of_oneOK one_ok_10 search_one_10
-  · exact count_eq_one_of_oneOK one_ok_11 search_one_11
-  · exact count_eq_one_of_oneOK one_ok_12 search_one_12
-  · exact count_eq_one_of_oneOK one_ok_14 search_one_14
-  · exact count_eq_one_of_oneOK one_ok_23 search_one_23
-  · exact count_eq_one_of_oneOK one_ok_30 search_one_30
-  · exact count_eq_one_of_oneOK one_ok_32 search_one_32
-  · exact count_eq_one_of_oneOK one_ok_86 search_one_86
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_1 search_one_1
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_2 search_one_2
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_3 search_one_3
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_4 search_one_4
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_5 search_one_5
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_7 search_one_7
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_8 search_one_8
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_9 search_one_9
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_10 search_one_10
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_11 search_one_11
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_12 search_one_12
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_14 search_one_14
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_23 search_one_23
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_30 search_one_30
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_32 search_one_32
+  · exact count_eq_one_of_oneOK (by norm_num) one_ok_86 search_one_86
 
 /-- The values at most eighty-six with exactly two good partitions. -/
 theorem count_eq_two_small : ∀ n ∈ ({6, 13, 21, 75} : Finset ℕ), count n = 2 := by
   intro n hn
   simp only [Finset.mem_insert, Finset.mem_singleton] at hn
   rcases hn with rfl | rfl | rfl | rfl
-  · exact count_eq_two_of_twoOK two_ok_6 search_two_6
-  · exact count_eq_two_of_twoOK two_ok_13 search_two_13
-  · exact count_eq_two_of_twoOK two_ok_21 search_two_21
-  · exact count_eq_two_of_twoOK two_ok_75 search_two_75
+  · exact count_eq_two_of_twoOK (by norm_num) two_ok_6 search_two_6
+  · exact count_eq_two_of_twoOK (by norm_num) two_ok_13 search_two_13
+  · exact count_eq_two_of_twoOK (by norm_num) two_ok_21 search_two_21
+  · exact count_eq_two_of_twoOK (by norm_num) two_ok_75 search_two_75
 
 end GNM

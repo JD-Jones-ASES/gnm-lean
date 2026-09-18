@@ -311,23 +311,6 @@ private theorem toBlock_cons (y : ℕ) (l : List ℕ) :
     toBlock (y :: l) = insert (y : ℤ) (toBlock l) := by
   simp [toBlock]
 
-/-- Membership in the set named by a list. -/
-private theorem mem_toBlock {l : List ℕ} {z : ℤ} : z ∈ toBlock l ↔ ∃ y ∈ l, (y : ℤ) = z := by
-  induction l with
-  | nil =>
-    rw [toBlock_nil]
-    simp
-  | cons y t ih =>
-    rw [toBlock_cons]
-    simp only [Finset.mem_insert, List.mem_cons, ih]
-    constructor
-    · rintro (rfl | ⟨w, hw, rfl⟩)
-      · exact ⟨y, Or.inl rfl, rfl⟩
-      · exact ⟨w, Or.inr hw, rfl⟩
-    · rintro ⟨w, hw | hw, rfl⟩
-      · exact Or.inl (by rw [hw])
-      · exact Or.inr ⟨w, hw, rfl⟩
-
 /-- The empty list of blocks names the empty partition. -/
 private theorem toBlocks_nil : toBlocks [] = (∅ : Finset (Finset ℤ)) := by
   simp [toBlocks]
@@ -372,7 +355,7 @@ private theorem mem_removeAll {y : ℕ} {B t : List ℕ} : y ∈ removeAll B t �
 private theorem toBlock_removeAll (B t : List ℕ) :
     toBlock (removeAll B t) = toBlock t \ toBlock B := by
   ext z
-  simp only [Finset.mem_sdiff, mem_toBlock]
+  simp only [Finset.mem_sdiff, mem_toBlock_iff]
   constructor
   · rintro ⟨y, hy, rfl⟩
     obtain ⟨hyt, hyB⟩ := mem_removeAll.mp hy
@@ -446,7 +429,7 @@ private theorem length_downFrom (n : ℕ) : (downFrom n).length = n := by
 /-- The descending list names the interval. -/
 private theorem toBlock_downFrom (n : ℕ) : toBlock (downFrom n) = interval n := by
   ext z
-  simp only [mem_toBlock, interval, Finset.mem_Icc]
+  simp only [mem_toBlock_iff, interval, Finset.mem_Icc]
   constructor
   · rintro ⟨y, hy, rfl⟩
     obtain ⟨h1, h2⟩ := mem_downFrom.mp hy
@@ -487,7 +470,7 @@ theorem mem_candidates_of {x : ℕ} {rest : List ℕ} (hsorted : rest.Pairwise (
   -- every entry of the block other than `x` is an entry of the list
   have hrest : ∀ z ∈ B, z ≠ (x : ℤ) → ∃ a, a ∈ rest ∧ (a : ℤ) = z := by
     intro z hz hne
-    obtain ⟨y, hy, rfl⟩ := mem_toBlock.mp (hsub hz)
+    obtain ⟨y, hy, rfl⟩ := mem_toBlock_iff.mp (hsub hz)
     rcases List.mem_cons.mp hy with rfl | hy
     · exact absurd rfl hne
     · exact ⟨y, hy, rfl⟩

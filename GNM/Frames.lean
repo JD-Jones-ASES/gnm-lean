@@ -108,7 +108,7 @@ theorem threeFrames_of_threeDisp {k j a : ℤ} (hk : 0 ≤ k) (ha : 1 ≤ a) (ha
 /-- Three checked lists of triples on a common support give three pairwise distinct partitions of
 that support into zero-sum triples. -/
 private theorem threeZero_of_tables (s : Finset ℤ) (support : List ℤ)
-    (b₀ b₁ b₂ : List (List ℤ)) (hs : support.toFinset = s) (hnd : nodupZ support = true)
+    (b₀ b₁ b₂ : List (List ℤ)) (hs : support.toFinset = s) (hnd : noDupZ support = true)
     (h₀ : framesOK support b₀ = true) (h₁ : framesOK support b₁ = true)
     (h₂ : framesOK support b₂ = true) (d₀₁ : differZ b₀ b₁ = true)
     (d₀₂ : differZ b₀ b₂ = true) (d₁₂ : differZ b₁ b₂ = true) : ThreeZero s :=
