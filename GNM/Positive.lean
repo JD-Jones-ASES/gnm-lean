@@ -337,7 +337,249 @@ theorem three_le_count_add_of_threeFrameA {P r t : ℕ} (hP : P = 3 ^ t) (hPr : 
 /-- Offset four: three explicit good partitions of `{1, …, P + 4}` for every power at least
 twenty-seven. -/
 theorem three_le_count_add_four {P t : ℕ} (hP : P = 3 ^ t) (ht : 3 ≤ t) : 3 ≤ count (P + 4) := by
-  sorry
+  have hP27 : 27 ≤ P := by
+    subst hP
+    have h : (3 : ℕ) ^ 3 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+    simpa using h
+  have hPZ : (P : ℤ) = (3 : ℤ) ^ t := by exact_mod_cast hP
+  have hP27Z : (27 : ℤ) ≤ (P : ℤ) := by exact_mod_cast hP27
+  obtain ⟨m, hm⟩ : ∃ m : ℤ, (P : ℤ) = 2 * m + 1 := by
+    have hodd : Odd ((3 : ℤ) ^ t) := (by decide : Odd (3 : ℤ)).pow
+    obtain ⟨u, hu⟩ := hodd
+    exact ⟨u, by omega⟩
+  -- the complement pairs common to all three partitions
+  have hcp : GoodOn (Finset.Icc (6 : ℤ) ((P : ℤ) - 6)) (canonicalPairs (P : ℤ) 6 m) := by
+    have h := canonicalPairs_goodOn (Q := P) (t := t) (lo := (6 : ℤ)) (hi := m) hP (by norm_num)
+      (by omega)
+    have hset : Finset.Icc (6 : ℤ) m ∪ Finset.Icc ((P : ℤ) - m) ((P : ℤ) - 6)
+        = Finset.Icc (6 : ℤ) ((P : ℤ) - 6) := by
+      ext x
+      simp only [Finset.mem_union, Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  -- a triple around the power sums to three times it
+  have gt : ∀ x y z : ℤ, x ≠ y → x ≠ z → y ≠ z → x + y + z = 3 * (P : ℤ) →
+      GoodBlock ({x, y, z} : Finset ℤ) := by
+    intro x y z hxy hxz hyz hs
+    refine goodBlock_triple hxy hxz hyz (k := t + 1) ?_
+    rw [pow_succ, ← hPZ]
+    omega
+  have gW₁ : GoodBlock ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have gW₂ : GoodBlock ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have gW₃ : GoodBlock ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have gV₁ : GoodBlock ({(P : ℤ) - 4, (P : ℤ) + 1, (P : ℤ) + 3} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have gV₂ : GoodBlock ({(P : ℤ) - 3, (P : ℤ) - 1, (P : ℤ) + 4} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have gV₃ : GoodBlock ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ) :=
+    gt _ _ _ (by omega) (by omega) (by omega) (by ring)
+  have g1 : GoodBlock ({1} : Finset ℤ) :=
+    ⟨Finset.singleton_nonempty _, by simp, 0, by norm_num⟩
+  have g45 : GoodBlock ({4, 5} : Finset ℤ) := goodBlock_pair (by norm_num) (k := 2) (by norm_num)
+  have g234 : GoodBlock ({2, 3, 4} : Finset ℤ) :=
+    goodBlock_triple (by norm_num) (by norm_num) (by norm_num) (k := 2) (by norm_num)
+  have g23P : GoodBlock ({2, 3, (P : ℤ) - 5} : Finset ℤ) :=
+    goodBlock_triple (by norm_num) (by omega) (by omega) (k := t) (by rw [← hPZ]; ring)
+  have g5P : GoodBlock ({5, (P : ℤ) - 5} : Finset ℤ) :=
+    goodBlock_pair (by omega) (k := t) (by rw [← hPZ]; ring)
+  -- the two frames around the power, each covering the centred interval of radius four
+  have hU : GoodOn (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6))
+      (insert ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+        (insert ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ)
+          (insert ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ)
+            (canonicalPairs (P : ℤ) 6 m)))) := by
+    have h := goodOn_insert₃ gW₁ gW₂ gW₃ hcp
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+    have hset : ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ) ∪
+        (({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ) ∪
+          (({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ) ∪
+            Finset.Icc (6 : ℤ) ((P : ℤ) - 6)))
+        = Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6) := by
+      ext x
+      simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union, Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  have hV : GoodOn (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6))
+      (insert ({(P : ℤ) - 4, (P : ℤ) + 1, (P : ℤ) + 3} : Finset ℤ)
+        (insert ({(P : ℤ) - 3, (P : ℤ) - 1, (P : ℤ) + 4} : Finset ℤ)
+          (insert ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ)
+            (canonicalPairs (P : ℤ) 6 m)))) := by
+    have h := goodOn_insert₃ gV₁ gV₂ gV₃ hcp
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+    have hset : ({(P : ℤ) - 4, (P : ℤ) + 1, (P : ℤ) + 3} : Finset ℤ) ∪
+        (({(P : ℤ) - 3, (P : ℤ) - 1, (P : ℤ) + 4} : Finset ℤ) ∪
+          (({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ) ∪
+            Finset.Icc (6 : ℤ) ((P : ℤ) - 6)))
+        = Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6) := by
+      ext x
+      simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union, Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  -- the merge block {2, 3, P − 5}, and the split {2, 3, 4}, {5, P − 5}
+  have hmerge : ∀ F : Finset (Finset ℤ),
+      GoodOn (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6)) F →
+      GoodOn (interval (P + 4)) (insert ({1} : Finset ℤ) (insert ({4, 5} : Finset ℤ)
+        (insert ({2, 3, (P : ℤ) - 5} : Finset ℤ) F))) := by
+    intro F hF
+    have h := goodOn_insert₃ g1 g45 g23P hF
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+    have hset : ({1} : Finset ℤ) ∪ (({4, 5} : Finset ℤ) ∪
+        (({2, 3, (P : ℤ) - 5} : Finset ℤ) ∪
+          (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6))))
+        = interval (P + 4) := by
+      ext x
+      simp only [interval, Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+        Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  have hsplit : ∀ F : Finset (Finset ℤ),
+      GoodOn (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6)) F →
+      GoodOn (interval (P + 4)) (insert ({1} : Finset ℤ) (insert ({2, 3, 4} : Finset ℤ)
+        (insert ({5, (P : ℤ) - 5} : Finset ℤ) F))) := by
+    intro F hF
+    have h := goodOn_insert₃ g1 g234 g5P hF
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp at hx hx'
+        omega)
+    have hset : ({1} : Finset ℤ) ∪ (({2, 3, 4} : Finset ℤ) ∪
+        (({5, (P : ℤ) - 5} : Finset ℤ) ∪
+          (Finset.Icc ((P : ℤ) - 4) ((P : ℤ) + 4) ∪ Finset.Icc (6 : ℤ) ((P : ℤ) - 6))))
+        = interval (P + 4) := by
+      ext x
+      simp only [interval, Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+        Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  have hb₁ := hmerge _ hU
+  have hb₂ := hsplit _ hU
+  have hb₃ := hsplit _ hV
+  -- the first partition carries the merge block, which the other two cannot
+  have hmergene : ({2, 3, (P : ℤ) - 5} : Finset ℤ) ≠ ({2, 3, 4} : Finset ℤ) := by
+    intro h
+    have h4 : (4 : ℤ) ∈ ({2, 3, (P : ℤ) - 5} : Finset ℤ) := by rw [h]; simp
+    simp only [Finset.mem_insert, Finset.mem_singleton] at h4
+    omega
+  have h₁₂ : insert ({1} : Finset ℤ) (insert ({4, 5} : Finset ℤ)
+      (insert ({2, 3, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m))))))
+      ≠ insert ({1} : Finset ℤ) (insert ({2, 3, 4} : Finset ℤ)
+      (insert ({5, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m)))))) := by
+    refine ne_of_mem_of_notMem (a := ({2, 3, (P : ℤ) - 5} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))) ?_
+    exact notMem_of_goodOn hb₂ (c := ({2, 3, 4} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)) hmergene
+      (Finset.mem_insert_self _ _) (Finset.mem_insert_self _ _)
+  have h₁₃ : insert ({1} : Finset ℤ) (insert ({4, 5} : Finset ℤ)
+      (insert ({2, 3, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m))))))
+      ≠ insert ({1} : Finset ℤ) (insert ({2, 3, 4} : Finset ℤ)
+      (insert ({5, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ) + 1, (P : ℤ) + 3} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) - 1, (P : ℤ) + 4} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m)))))) := by
+    refine ne_of_mem_of_notMem (a := ({2, 3, (P : ℤ) - 5} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))) ?_
+    exact notMem_of_goodOn hb₃ (c := ({2, 3, 4} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)) hmergene
+      (Finset.mem_insert_self _ _) (Finset.mem_insert_self _ _)
+  -- the second and the third differ in the frame around the power
+  have hframene : ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+      ≠ ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ) := by
+    intro h
+    have h4 : (P : ℤ) - 4 ∈ ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ) := by
+      rw [← h]; simp
+    simp only [Finset.mem_insert, Finset.mem_singleton] at h4
+    omega
+  have h₂₃ : insert ({1} : Finset ℤ) (insert ({2, 3, 4} : Finset ℤ)
+      (insert ({5, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) + 1, (P : ℤ) + 2} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ) - 1, (P : ℤ) + 3} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m))))))
+      ≠ insert ({1} : Finset ℤ) (insert ({2, 3, 4} : Finset ℤ)
+      (insert ({5, (P : ℤ) - 5} : Finset ℤ)
+        (insert ({(P : ℤ) - 4, (P : ℤ) + 1, (P : ℤ) + 3} : Finset ℤ)
+          (insert ({(P : ℤ) - 3, (P : ℤ) - 1, (P : ℤ) + 4} : Finset ℤ)
+            (insert ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ)
+              (canonicalPairs (P : ℤ) 6 m)))))) := by
+    refine ne_of_mem_of_notMem (a := ({(P : ℤ) - 4, (P : ℤ), (P : ℤ) + 4} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_insert_self _ _)))) ?_
+    exact notMem_of_goodOn hb₃ (c := ({(P : ℤ) - 2, (P : ℤ), (P : ℤ) + 2} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem
+        (Finset.mem_insert_of_mem (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))))))
+      hframene (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _))
+  exact three_le_count ((isGoodPartition_iff _ _).mpr hb₁) ((isGoodPartition_iff _ _).mpr hb₂)
+    ((isGoodPartition_iff _ _).mpr hb₃) h₁₂ h₁₃ h₂₃
 
 /-- Offset six: the two good partitions of `{1, …, 6}` extended by complement pairs, with the
 symmetric frame at `k = 2` and its negation. -/
@@ -376,26 +618,17 @@ theorem three_le_count_add_six {P t : ℕ} (hP : P = 3 ^ t) (ht : 3 ≤ t) : 3 �
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
     have hset : ({1, 2, 6} : Finset ℤ) ∪ (({3} : Finset ℤ) ∪
         (({4, 5} : Finset ℤ) ∪ Finset.Icc (7 : ℤ) ((P : ℤ) - 7))) = interval (P - 6 - 1) := by
@@ -411,26 +644,17 @@ theorem three_le_count_add_six {P t : ℕ} (hP : P = 3 ^ t) (ht : 3 ≤ t) : 3 �
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
       (by
         refine Finset.disjoint_left.mpr ?_
         intro x hx hx'
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx
-        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
-          Finset.mem_Icc] at hx'
+        simp at hx hx'
         omega)
     have hset : ({1, 2} : Finset ℤ) ∪ (({3, 6} : Finset ℤ) ∪
         (({4, 5} : Finset ℤ) ∪ Finset.Icc (7 : ℤ) ((P : ℤ) - 7))) = interval (P - 6 - 1) := by
