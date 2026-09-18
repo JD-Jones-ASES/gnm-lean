@@ -342,7 +342,139 @@ theorem three_le_count_add_four {P t : ℕ} (hP : P = 3 ^ t) (ht : 3 ≤ t) : 3 
 /-- Offset six: the two good partitions of `{1, …, 6}` extended by complement pairs, with the
 symmetric frame at `k = 2` and its negation. -/
 theorem three_le_count_add_six {P t : ℕ} (hP : P = 3 ^ t) (ht : 3 ≤ t) : 3 ≤ count (P + 6) := by
-  sorry
+  have hP27 : 27 ≤ P := by
+    subst hP
+    have h : (3 : ℕ) ^ 3 ≤ 3 ^ t := Nat.pow_le_pow_right (by norm_num) ht
+    simpa using h
+  have hPZ : (P : ℤ) = (3 : ℤ) ^ t := by exact_mod_cast hP
+  have hP27Z : (27 : ℤ) ≤ (P : ℤ) := by exact_mod_cast hP27
+  obtain ⟨m, hm⟩ : ∃ m : ℤ, (P : ℤ) = 2 * m + 1 := by
+    have hodd : Odd ((3 : ℤ) ^ t) := (by decide : Odd (3 : ℤ)).pow
+    obtain ⟨u, hu⟩ := hodd
+    exact ⟨u, by omega⟩
+  -- the complement pairs common to both sources
+  have hcp : GoodOn (Finset.Icc (7 : ℤ) ((P : ℤ) - 7)) (canonicalPairs (P : ℤ) 7 m) := by
+    have h := canonicalPairs_goodOn (Q := P) (t := t) (lo := (7 : ℤ)) (hi := m) hP (by norm_num)
+      (by omega)
+    have hset : Finset.Icc (7 : ℤ) m ∪ Finset.Icc ((P : ℤ) - m) ((P : ℤ) - 7)
+        = Finset.Icc (7 : ℤ) ((P : ℤ) - 7) := by
+      ext x
+      simp only [Finset.mem_union, Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  have g126 : GoodBlock ({1, 2, 6} : Finset ℤ) :=
+    goodBlock_triple (by norm_num) (by norm_num) (by norm_num) (k := 2) (by norm_num)
+  have g3 : GoodBlock ({3} : Finset ℤ) :=
+    ⟨Finset.singleton_nonempty _, by simp, 1, by norm_num⟩
+  have g45 : GoodBlock ({4, 5} : Finset ℤ) := goodBlock_pair (by norm_num) (k := 2) (by norm_num)
+  have g12 : GoodBlock ({1, 2} : Finset ℤ) := goodBlock_pair (by norm_num) (k := 1) (by norm_num)
+  have g36 : GoodBlock ({3, 6} : Finset ℤ) := goodBlock_pair (by norm_num) (k := 2) (by norm_num)
+  have hsrc₁ : GoodOn (interval (P - 6 - 1))
+      (insert ({1, 2, 6} : Finset ℤ) (insert ({3} : Finset ℤ)
+        (insert ({4, 5} : Finset ℤ) (canonicalPairs (P : ℤ) 7 m)))) := by
+    have h := goodOn_insert₃ g126 g3 g45 hcp
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+    have hset : ({1, 2, 6} : Finset ℤ) ∪ (({3} : Finset ℤ) ∪
+        (({4, 5} : Finset ℤ) ∪ Finset.Icc (7 : ℤ) ((P : ℤ) - 7))) = interval (P - 6 - 1) := by
+      ext x
+      simp only [interval, Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+        Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  have hsrc₂ : GoodOn (interval (P - 6 - 1))
+      (insert ({1, 2} : Finset ℤ) (insert ({3, 6} : Finset ℤ)
+        (insert ({4, 5} : Finset ℤ) (canonicalPairs (P : ℤ) 7 m)))) := by
+    have h := goodOn_insert₃ g12 g36 g45 hcp
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+      (by
+        refine Finset.disjoint_left.mpr ?_
+        intro x hx hx'
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx
+        simp only [Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+          Finset.mem_Icc] at hx'
+        omega)
+    have hset : ({1, 2} : Finset ℤ) ∪ (({3, 6} : Finset ℤ) ∪
+        (({4, 5} : Finset ℤ) ∪ Finset.Icc (7 : ℤ) ((P : ℤ) - 7))) = interval (P - 6 - 1) := by
+      ext x
+      simp only [interval, Finset.mem_insert, Finset.mem_singleton, Finset.mem_union,
+        Finset.mem_Icc]
+      omega
+    rwa [hset] at h
+  -- the two sources differ in the block of three
+  have hsrcne : (insert ({1, 2, 6} : Finset ℤ) (insert ({3} : Finset ℤ)
+      (insert ({4, 5} : Finset ℤ) (canonicalPairs (P : ℤ) 7 m))))
+      ≠ (insert ({1, 2} : Finset ℤ) (insert ({3, 6} : Finset ℤ)
+      (insert ({4, 5} : Finset ℤ) (canonicalPairs (P : ℤ) 7 m)))) := by
+    refine ne_of_mem_of_notMem (a := ({3} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)) ?_
+    refine notMem_of_goodOn hsrc₂ (c := ({3, 6} : Finset ℤ))
+      (Finset.mem_insert_of_mem (Finset.mem_insert_self _ _)) ?_
+      (Finset.mem_singleton_self _) (Finset.mem_insert_self _ _)
+    intro h
+    have h6 : (6 : ℤ) ∈ ({3} : Finset ℤ) := by rw [h]; simp
+    simp at h6
+  -- the symmetric frame at k = 2 and its negation
+  have h6cast : ((6 : ℕ) : ℤ) % 3 = 0 := by norm_num
+  have hfs : frameSet ((6 : ℕ) : ℤ) = symInterval 2 := by
+    unfold frameSet symInterval
+    rw [if_pos h6cast]
+    norm_num
+  have hz₁ : ZeroPartition (frameSet ((6 : ℕ) : ℤ)) (symFamily 2) := by
+    rw [hfs]
+    exact symFamily_zeroPartition 2 (by norm_num)
+  have hz₂ : ZeroPartition (frameSet ((6 : ℕ) : ℤ)) (negBlocks (symFamily 2)) := by
+    rw [hfs]
+    have h := ZeroPartition.negBlocks (symFamily_zeroPartition 2 (by norm_num))
+    rwa [symInterval_neg] at h
+  have hzne : symFamily 2 ≠ negBlocks (symFamily 2) := symFamily_ne_neg 2 (by norm_num)
+  have hPr : 2 * 6 < P := by omega
+  have hmod : 6 % 3 = 0 ∨ 6 % 3 = 1 := Or.inl (by norm_num)
+  exact three_le_count
+    ((isGoodPartition_iff _ _).mpr (targetA_goodOn hP hPr hmod hsrc₁ hz₁))
+    ((isGoodPartition_iff _ _).mpr (targetA_goodOn hP hPr hmod hsrc₁ hz₂))
+    ((isGoodPartition_iff _ _).mpr (targetA_goodOn hP hPr hmod hsrc₂ hz₁))
+    (targetA_ne_of_frame_ne hP hPr hmod hsrc₁ hz₁ hz₂ hzne)
+    (targetA_ne_of_src_ne hP hPr hmod hsrc₁ hsrc₂ hz₁ hz₁ hsrcne)
+    (targetA_ne_of_src_ne hP hPr hmod hsrc₁ hsrc₂ hz₂ hz₁ hsrcne)
 
 /-- The contracted source of the signed construction: the source partition with the block through
 the largest element contracted at the partner, and the resulting pair removed when it collides with
