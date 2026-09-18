@@ -30,8 +30,8 @@ python scripts/check_counts.py
 ```
 
 The `Test` target audits every constant whose name begins with `GN.`, `GNM.` or the private
-auxiliaries Lean generates for them and for Solution (DESK_FILLS at the time of writing, floor
-1600), permits only `propext`, `Classical.choice` and `Quot.sound`, and fails if any of the four
+auxiliaries Lean generates for them and for Solution (3,765 at the time of writing, floor
+3,500), permits only `propext`, `Classical.choice` and `Quot.sound`, and fails if any of the four
 compared theorems is missing. A placeholder in a proof compiles with a warning; this audit is what
 fails the build. Challenge.lean intentionally contains four proof placeholders; Solution.lean and
 the modules it imports contain none, and Solution.lean does not import Challenge.lean. The source
@@ -50,11 +50,11 @@ added to a Mathlib-loaded process.
 
 | Computation | Where | Size |
 | --- | --- | --- |
-| The exhaustive search at `n = 86`, `search 86 (baseWitnesses 86) = true` | GNM/SearchFacts.lean | the largest single computation: DESK_FILLS s, DESK_FILLS GB peak |
-| The searches at the other nineteen values `1, …, 14, 21, 23, 30, 32, 75` | GNM/SearchFacts.lean | one `decide +kernel` each, DESK_FILLS s in total |
-| The checker facts for the tabulated partitions, and their pairwise differences | GNM/SearchFacts.lean | one batch over every tabulated partition at every `n ≤ 86`, DESK_FILLS s, DESK_FILLS GB peak |
-| The permutation certificates, `4 ≤ k ≤ 21` | GNM/Perms.lean | three image-equality statements and one distinctness statement per radius, 72 `decide` calls, DESK_FILLS s in total |
-| The frame tables at radius eleven, at offset seven and the two tabulated exceptions | GNM/Frames.lean, GNM/Data/Frames.lean | one `decide` per table and per pair of tables, DESK_FILLS s in total |
+| The exhaustive search at `n = 86`, `search 86 (baseWitnesses 86) = true` | GNM/SearchFacts.lean | the largest single computation: 24 s, 4.0 GB peak |
+| The searches at the other nineteen values `1, …, 14, 21, 23, 30, 32, 75` | GNM/SearchFacts.lean | one `decide +kernel` each, about 17 s in total (9 s of it at `n = 75`) |
+| The checker facts for the tabulated partitions, and their pairwise differences | GNM/SearchFacts.lean | one batch over every tabulated partition at every `n ≤ 86`, 4 s, 1.3 GB peak |
+| The permutation certificates, `4 ≤ k ≤ 21` | GNM/Perms.lean | three image-equality statements and one distinctness statement per radius, 72 `decide` calls, about 220 s of module wall time (the commands elaborate in parallel; 600 s of processor time, the slowest single call 27 s) |
+| The frame tables at radius eleven, at offset seven and the two tabulated exceptions | GNM/Frames.lean, GNM/Data/Frames.lean | one `decide` per table and per pair of tables, under one second each |
 
 `scripts/check_counts.py` recomputes the finite content with the standard library and exact
 integers: the exact number of good partitions at the twenty values whose count the classification
