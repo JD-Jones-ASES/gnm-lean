@@ -1,0 +1,190 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "gnm-lean: the number of partitions of {1, ..., n} into sets of at most three elements with power-of-three sums"
+  description: >-
+    A Lean 4 classification of the number of good partitions of an initial interval, where a good
+    partition of {1, ..., n} is a set of pairwise disjoint nonempty blocks of at most three integers
+    covering {1, ..., n}, each block summing to a power of three, and count n is the number of them.
+    With N_u = {1, 2, 3, 4} union {3^t - 4, 3^t - 2, 3^t - 1, 3^t, 3^t + 1, 3^t + 2, 3^t + 3,
+    3^t + 5 : t >= 2} and E_2 = {13} union {3^t - 3 : t >= 2} union {3^t - 6 : t >= 3}, the four
+    compared theorems say that for n >= 1 the count is 1 exactly on N_u, is 2 exactly on E_2, and is
+    at least 3 elsewhere, and that the count is 2 at every 3^t - 6 with t >= 3. The source proves
+    uniqueness on N_u, records exactly two partitions at 3^t - 3 and at 13, and conjectures more
+    than two at every other n; the family 3^t - 6 refutes that conjecture as printed. The lower
+    bounds are three explicit partitions transported by four constructions each of which keeps a
+    recoverable component; the exact values are exhaustive enumerations at twenty values n <= 86,
+    kernel-checked and complete by a theorem about the search, carried to every power of three by
+    stabilization above a threshold.
+  authors: ["JD Jones"]
+  responsible_maintainers: ["JD Jones"]
+  license: "MIT"
+
+classification:
+  arxiv: ["math.CO", "math.NT"]
+  msc2020: ["05A17", "11B75"]
+
+sources:
+  - title: >-
+      Partitioning set [n]={1,...,n} into subsets of size at most m such that all sums are powers
+      of m
+    authors: ["Vladimir Gurvich", "Mariya Naumova"]
+    id: "arXiv:2508.00946v3"
+    type: "paper"
+    location: "https://arxiv.org/abs/2508.00946v3"
+    relationship: "adapts"
+    author_endorsement: "not-contacted"
+    note: >-
+      Supplies the setting and the two exceptional sets. Its Theorem 3, that the good partition is
+      unique exactly on N_u, is re-proved here by this development's own route rather than
+      formalized from the source's argument; the same theorem records exactly two partitions at
+      3^t - 3 and at 13 and conjectures more than two at every other n, and that conjecture is
+      refuted here by the family 3^t - 6, t >= 3, which also has exactly two. No proof of the source
+      is formalized, and nothing is claimed for parts of size at most m with m other than 3.
+  - title: "Hooked extended Langford sequences of small and large defects"
+    authors: ["S. Mor", "V. Linek"]
+    id: "doi:10.2478/s12175-014-0242-6"
+    type: "paper"
+    location: "https://doi.org/10.2478/s12175-014-0242-6"
+    relationship: "adapts"
+    author_endorsement: "not-contacted"
+    note: >-
+      Mathematica Slovaca 64 (2014), no. 4, 819-842. Supplies the Langford formulas adapted in
+      GN/LangfordTables.lean for excesses six, seven and eight, as the metadata of the copied
+      development records; the counting layer of this repository uses those tables only through the
+      gluing theorem it generalizes. The paper is not imported as an axiom.
+  - title: "On the number of additive permutations and Skolem-type sequences"
+    authors: ["Diane M. Donovan", "Michael J. Grannell"]
+    id: "doi:10.26493/1855-3974.1098.ca0"
+    type: "paper"
+    location: "https://doi.org/10.26493/1855-3974.1098.ca0"
+    relationship: "background"
+    author_endorsement: "not-contacted"
+    note: >-
+      Ars Mathematica Contemporanea 14 (2018), no. 2, 415-432. Lower bounds for the number of
+      additive permutations of a centred interval. Deleting the fixed point of such a permutation
+      leaves a displacement permutation with one hole, so that count is the count of displacement
+      permutations used here summed over the hole; the bounds concern the total and say nothing
+      about a single hole. Nothing from this paper is formalized or used.
+
+related_formalizations:
+  - id: "PALOMAR-2026-09-07-000013"
+    relationship: "builds-on"
+    note: >-
+      gn-lean, by the same author: every {1, ..., n} has a good partition. The directory GN/ of this
+      repository is an unchanged copy of that development at commit
+      73bb87b16da8c053fd07e0d4dc43732b74335a3b, MIT, and the counting layer in GNM/ uses its objects
+      and theorems.
+
+status:
+  scope: >-
+    Four compared declarations over four compared definitions. They classify the number of good
+    partitions of {1, ..., n} for n >= 1: exactly one on N_u, exactly two on E_2, at least three
+    elsewhere, and exactly two at every 3^t - 6 with t >= 3. No asymptotics and no closed form for
+    count n are proved, no value outside the classification is claimed, and nothing is claimed at
+    any base other than three. The value n = 0 lies outside the classification and is excluded by
+    hypothesis in two of the theorems. The intentional placeholders of Challenge.lean are excluded
+    from proof counts; Solution.lean does not import Challenge.lean.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "GNM.count_eq_one_iff"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "GNM.count_eq_two_iff"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "GNM.three_le_count_iff"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+    - declaration: "GNM.count_eq_two_of_add_six"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      comparator_config: "comparator.json"
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["Claude (Anthropic)", "GPT-6 (OpenAI)", "Grok (xAI)"]
+      framework: "Claude Code with parallel subagents"
+      tool_setup: >-
+        The project was directed by its author. Claude (Anthropic), GPT-6 (OpenAI) and Grok (xAI)
+        were used throughout; the classification and its proof arose in consultation among these
+        systems, and the repository was written by Claude. Lean 4.33.0 and Mathlib v4.33.0 (commit
+        db584cd6d46c92f209a44c0f1c829460d327499d) are pinned by the committed manifest and lake
+        update is never run; there are no GitHub Actions workflows. There is no native_decide; the
+        largest kernel computations are the exhaustive search at n = 86 and the permutation
+        certificates for radii four to twenty-one.
+  spend_usd: "not tracked"
+  notes: "See DISCLOSURE.md."
+
+fidelity:
+  divergences: >-
+    Intervals and centred intervals are stated as bounds on the elements rather than as interval
+    constants, so that no statement type depends on an instance that can diverge. The two
+    exceptional sets are written with sums (n + 4 = 3^t rather than n = 3^t - 4), which also keeps
+    them inside the natural numbers. count n is the cardinality of a subtype of finite sets of
+    finite sets of integers, as Nat.card; the good partitions are shown to form a finite set, and
+    count n is its Finset cardinality. The value n = 0 has the empty partition and nothing else, so
+    count 0 = 1; it lies outside the classification, which is why two of the four theorems assume
+    1 <= n. Blocks are finite sets of integers whose union is constrained to be the positive
+    interval, so no repeated or negative labels are admitted. The source's own proofs are not
+    formalized; its Theorem 3 is re-proved here independently.
+
+review:
+  status: "self-assessed"
+  notes: >-
+    No independent human expert review and no source-author endorsement is recorded; AI agents
+    developed and cross-reviewed the proof, the statements were checked against the source text, and
+    VERIFICATION.md states what is checked and what is not. Mechanical correctness and agreement of
+    formal statements do not establish priority or significance.
+
+alignment:
+  namespace: "GNM"
+  statements:
+    - source: "Gurvich-Naumova, arXiv:2508.00946v3, Theorem 3 (uniqueness), re-proved and completed to an equivalence"
+      lean: "GNM.count_eq_one_iff"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        For n >= 1 the good partition of {1, ..., n} is unique exactly when n lies in N_u. The
+        source proves one direction for the members of N_u; the converse is this development's.
+    - source: "Gurvich-Naumova, arXiv:2508.00946v3, Theorem 3 (the values with exactly two partitions), corrected"
+      lean: "GNM.count_eq_two_iff"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        There are exactly two good partitions of {1, ..., n} exactly when n lies in
+        E_2 = {13} union {3^t - 3 : t >= 2} union {3^t - 6 : t >= 3}. The source lists the first two
+        families; the third is this development's.
+    - source: "Counterexample to the conjecture printed in Gurvich-Naumova, arXiv:2508.00946v3, Theorem 3"
+      lean: "GNM.count_eq_two_of_add_six"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        Every {1, ..., 3^t - 6} with t >= 3 has exactly two good partitions, so the number of good
+        partitions is not greater than two at every n outside the source's list.
+    - source: "Not in any source: the complement of the two exceptional sets"
+      lean: "GNM.three_le_count_iff"
+      module: "Solution"
+      status: "proved"
+      note: >-
+        For n >= 1 there are at least three good partitions of {1, ..., n} exactly when n lies in
+        neither N_u nor E_2.
+
+acknowledgements: >-
+  Vladimir Gurvich and Mariya Naumova for the problem, the uniqueness theorem and the two
+  exceptional families; S. Mor and V. Linek for the Langford constructions adapted inside the copied
+  development; Diane M. Donovan and Michael J. Grannell for the counting of additive permutations
+  that sets the context for the displacement permutations used here; Lean, Mathlib, Comparator,
+  lean4export, NanoDa, and the Palomar policy and verifier projects. AI assistance is disclosed
+  above and in DISCLOSURE.md.
