@@ -4,7 +4,7 @@ import GNM.SearchFacts
 /-!
 # The finite base
 
-Below eighty-one the classification is decided by evaluation. At every value outside the two
+At the tabulated values the classification is decided by evaluation. At every value outside the two
 exceptional sets, three of the tabulated partitions are good partitions of the interval and no two
 of them are equal, so the count is at least three; and at the twenty values whose exact count the
 classification consumes, the exhaustive search run against the tabulated list shows that the list is
@@ -201,7 +201,7 @@ theorem three_le_count_of_le_80 (n : ℕ) (hn1 : 1 ≤ n) (hn : n ≤ 80) (h1 : 
   · exact three_le_count_of_le_70 n (by omega) c70 h1 h2
   exact three_le_count_of_le_80_block n (by omega) hn h1 h2
 
-/-- The values at most eighty-six with exactly one good partition. -/
+/-- The sixteen values whose count of one the finite base settles. -/
 theorem count_eq_one_small :
     ∀ n ∈ ({1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 14, 23, 30, 32, 86} : Finset ℕ),
       count n = 1 := by
@@ -226,7 +226,7 @@ theorem count_eq_one_small :
   · exact count_eq_one_of_oneOK (by norm_num) one_ok_32 search_one_32
   · exact count_eq_one_of_oneOK (by norm_num) one_ok_86 search_one_86
 
-/-- The values at most eighty-six with exactly two good partitions. -/
+/-- The four values whose count of two the finite base settles. -/
 theorem count_eq_two_small : ∀ n ∈ ({6, 13, 21, 75} : Finset ℕ), count n = 2 := by
   intro n hn
   simp only [Finset.mem_insert, Finset.mem_singleton] at hn

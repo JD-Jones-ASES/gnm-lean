@@ -1,9 +1,9 @@
 namespace GNM
 
-/-- Explicit good partitions of `{1, …, n}` for `n ≤ 86`: three at every `n` outside the
-exceptional set, and the complete list at every exceptional `n`; their correctness and, where
-stated, their completeness are established by kernel-checked computations in the modules that use
-them. -/
+/-- Explicit good partitions of `{1, …, n}`: three at every `n ≤ 80` outside the exceptional sets,
+the complete list at every exceptional `n ≤ 80`, and the single partition of `{1, …, 86}`; the values
+`81` to `85` are not tabulated and give the empty list. Their correctness and, where stated, their
+completeness are established by kernel-checked computations in the modules that use them. -/
 def baseWitnesses : Nat → List (List (List Nat))
   | 1 => [[[1]]]
   | 2 => [[[2, 1]]]

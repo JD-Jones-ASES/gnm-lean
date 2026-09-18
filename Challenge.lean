@@ -8,13 +8,15 @@ sum is `3 ^ k` for some natural number `k` (so `3 ^ 0 = 1` is allowed). A good p
 `{1, …, n}` is a finite set of pairwise disjoint good blocks whose union is exactly `{1, …, n}`,
 and `count n` is the number of good partitions of `{1, …, n}`. Gurvich and Naumova
 (arXiv:2508.00946v3) conjectured that every `{1, …, n}` has a good partition, proved that the
-partition is unique exactly on the set `N_u` below (their Theorem 3), listed the values with exactly
-two partitions as `{13} ∪ {3^t − 3 : t ≥ 2}`, and conjectured that every other `n` has more than two.
+partition is unique for every `n` in the set `N_u` below (their Theorem 3), listed the values with
+exactly two partitions as `{13} ∪ {3^t − 3 : t ≥ 2}`, and conjectured, immediately after that
+theorem, that every other `n` has more than two, reporting a computer check up to `n = 844`.
 
 The theorems below give the complete classification: `count n = 1` exactly on `N_u`; `count n = 2`
 exactly on `E_2 = {13} ∪ {3^t − 3 : t ≥ 2} ∪ {3^t − 6 : t ≥ 3}`; and `count n ≥ 3` for every other
 `n ≥ 1`. The last theorem states the family `n = 3^t − 6` (`t ≥ 3`) on its own: each of its members
-has exactly two good partitions, so the conjecture as printed does not hold there.
+has exactly two good partitions, so the conjecture as printed does not hold there; the first member
+`21` lies inside the reported range.
 
 The interval is written with bounds rather than as an interval constant. The value `n = 0` has the
 empty partition and nothing else, so `count 0 = 1`; it lies outside the classification, which is why

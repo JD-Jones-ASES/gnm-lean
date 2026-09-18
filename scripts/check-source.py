@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Reject proof placeholders and prohibited declarations in GN, GNM, Solution and Test.
 
-Rejected outside comments and strings: sorry, admit, axiom, unsafe, partial, native_decide,
-implemented_by, extern, Lean.ofReduceBool, and the kernel-bypass options debug.skipKernelTC and
-debug.byAsSorry. Challenge.lean carries the submitted statements with intentional sorry
-placeholders, so it is checked for every token except sorry. The [leanOptions] table of
-lakefile.toml, if present, may not set any debug. option. The compiled Test.Axioms module and an
-independent kernel replay are separate checks.
+Rejected outside comments and strings: sorry, sorryAx, admit, axiom, unsafe, partial,
+native_decide, implemented_by, extern, ofReduceBool (qualified or not), and the kernel-bypass
+options debug.skipKernelTC and debug.byAsSorry. Challenge.lean carries the submitted statements
+with intentional sorry placeholders, so it is checked for every token except sorry. The
+[leanOptions] table of lakefile.toml, if present, may not set any debug. option. The compiled
+Test.Axioms module is a separate check.
 """
 
 from pathlib import Path
@@ -14,11 +14,11 @@ import re
 import sys
 
 FORBIDDEN = re.compile(
-    r"\b(?:sorry|admit|axiom|unsafe|partial|native_decide|implemented_by|extern)\b"
-    r"|\bLean\.ofReduceBool\b|\bdebug\.skipKernelTC\b|\bdebug\.byAsSorry\b")
+    r"\b(?:sorry|sorryAx|admit|axiom|unsafe|partial|native_decide|implemented_by|extern)\b"
+    r"|\b(?:Lean\.)?ofReduceBool\b|\bdebug\.skipKernelTC\b|\bdebug\.byAsSorry\b")
 CHALLENGE_FORBIDDEN = re.compile(
-    r"\b(?:admit|axiom|unsafe|partial|native_decide|implemented_by|extern)\b"
-    r"|\bLean\.ofReduceBool\b|\bdebug\.skipKernelTC\b|\bdebug\.byAsSorry\b")
+    r"\b(?:sorryAx|admit|axiom|unsafe|partial|native_decide|implemented_by|extern)\b"
+    r"|\b(?:Lean\.)?ofReduceBool\b|\bdebug\.skipKernelTC\b|\bdebug\.byAsSorry\b")
 LAKEFILE_DEBUG = re.compile(r"^\s*debug\.")
 
 

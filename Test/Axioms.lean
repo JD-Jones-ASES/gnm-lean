@@ -30,8 +30,8 @@ run_cmd do
         unless allowed.contains ax do
           rejected := rejected + 1
           logError m!"Unexpected axiom dependency: {name} -> {ax}"
-  unless checked ≥ 3500 do
-    logError m!"Axiom audit matched only {checked} project constants; expected at least 3500"
+  unless checked ≥ 3700 do
+    logError m!"Axiom audit matched only {checked} project constants; expected at least 3700"
   for n in [`GNM.count_eq_one_iff, `GNM.count_eq_two_iff, `GNM.three_le_count_iff,
       `GNM.count_eq_two_of_add_six] do
     unless env.contains n do

@@ -31,13 +31,13 @@ python scripts/check_counts.py
 
 The `Test` target audits every constant whose name begins with `GN.`, `GNM.` or the private
 auxiliaries Lean generates for them and for Solution (3,765 at the time of writing, floor
-3,500), permits only `propext`, `Classical.choice` and `Quot.sound`, and fails if any of the four
+3,700), permits only `propext`, `Classical.choice` and `Quot.sound`, and fails if any of the four
 compared theorems is missing. A placeholder in a proof compiles with a warning; this audit is what
 fails the build. Challenge.lean intentionally contains four proof placeholders; Solution.lean and
 the modules it imports contain none, and Solution.lean does not import Challenge.lean. The source
 guard rejects `sorry`, `admit`, `axiom`, `unsafe`, `partial`, `native_decide`, `implemented_by`,
 `extern`, `Lean.ofReduceBool` and the kernel-bypass options in `GN/`, `GNM/`, Solution.lean and
-`Test/`, the same tokens except `sorry` in Challenge.lean, and any `debug.` option in lakefile.toml.
+`Test/`, the same tokens except `sorry` in Challenge.lean, and any `debug.` option in the `[leanOptions]` table of lakefile.toml.
 
 Lean 4.33.0 and Mathlib v4.33.0 (commit `db584cd6d46c92f209a44c0f1c829460d327499d`) are pinned by
 the committed manifest; `lake update` is never run.
@@ -52,7 +52,8 @@ added to a Mathlib-loaded process.
 | --- | --- | --- |
 | The exhaustive search at `n = 86`, `search 86 (baseWitnesses 86) = true` | GNM/SearchFacts.lean | the largest single computation: 24 s, 4.0 GB peak |
 | The searches at the other nineteen values `1, …, 14, 21, 23, 30, 32, 75` | GNM/SearchFacts.lean | one `decide +kernel` each, about 17 s in total (9 s of it at `n = 75`) |
-| The checker facts for the tabulated partitions, and their pairwise differences | GNM/SearchFacts.lean | one batch over every tabulated partition at every `n ≤ 86`, 4 s, 1.3 GB peak |
+| The checker facts for the tabulated partitions | GNM/SearchFacts.lean | one batch over every tabulated partition at every `n ≤ 86`, 4 s, 1.3 GB peak |
+| The per-value facts the base reads: three good and pairwise different partitions at the 51 non-exceptional `n ≤ 80`, one or two at the twenty exact values | GNM/SearchFacts.lean | 71 further `decide +kernel` calls, about 4 s in total |
 | The permutation certificates, `4 ≤ k ≤ 21` | GNM/Perms.lean | three image-equality statements and one distinctness statement per radius, 72 `decide` calls, about 220 s of module wall time (the commands elaborate in parallel; 600 s of processor time, the slowest single call 27 s) |
 | The frame tables at radius eleven, at offset seven and the two tabulated exceptions | GNM/Frames.lean, GNM/Data/Frames.lean | one `decide` per table and per pair of tables, under one second each |
 

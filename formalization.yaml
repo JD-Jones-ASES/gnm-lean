@@ -11,8 +11,10 @@ project:
     3^t + 5 : t >= 2} and E_2 = {13} union {3^t - 3 : t >= 2} union {3^t - 6 : t >= 3}, the four
     compared theorems say that for n >= 1 the count is 1 exactly on N_u, is 2 exactly on E_2, and is
     at least 3 elsewhere, and that the count is 2 at every 3^t - 6 with t >= 3. The source proves
-    uniqueness on N_u, records exactly two partitions at 3^t - 3 and at 13, and conjectures more
-    than two at every other n; the family 3^t - 6 refutes that conjecture as printed. The lower
+    uniqueness for every n in N_u, records exactly two partitions at 3^t - 3 and at 13, and
+    conjectures, immediately after that theorem, more than two at every other n, reporting a
+    computer check up to n = 844; the family 3^t - 6 (first member 21) refutes that conjecture as
+    printed, and the converse of the uniqueness statement is proved here. The lower
     bounds are three explicit partitions transported by four constructions each of which keeps a
     recoverable component; the exact values are exhaustive enumerations at twenty values n <= 86,
     kernel-checked and complete by a theorem about the search, carried to every power of three by
@@ -37,10 +39,12 @@ sources:
     author_endorsement: "not-contacted"
     note: >-
       Supplies the setting and the two exceptional sets. Its Theorem 3, that the good partition is
-      unique exactly on N_u, is re-proved here by this development's own route rather than
-      formalized from the source's argument; the same theorem records exactly two partitions at
-      3^t - 3 and at 13 and conjectures more than two at every other n, and that conjecture is
-      refuted here by the family 3^t - 6, t >= 3, which also has exactly two. No proof of the source
+      unique for every n in N_u, is re-proved here by this development's own route rather than
+      formalized from the source's argument, and completed to an equivalence; the same theorem
+      records exactly two partitions at 3^t - 3 and at 13, and the text immediately after it
+      conjectures more than two at every other n and reports a computer check of that conjecture
+      up to n = 844. The conjecture is refuted here by the family 3^t - 6, t >= 3, which also has
+      exactly two; its first member 21 lies inside the reported range. No proof of the source
       is formalized, and nothing is claimed for parts of size at most m with m other than 3.
   - title: "Hooked extended Langford sequences of small and large defects"
     authors: ["S. Mor", "V. Linek"]
@@ -166,7 +170,7 @@ alignment:
         There are exactly two good partitions of {1, ..., n} exactly when n lies in
         E_2 = {13} union {3^t - 3 : t >= 2} union {3^t - 6 : t >= 3}. The source lists the first two
         families; the third is this development's.
-    - source: "Counterexample to the conjecture printed in Gurvich-Naumova, arXiv:2508.00946v3, Theorem 3"
+    - source: "Counterexample to the conjecture stated after Theorem 3 of Gurvich-Naumova, arXiv:2508.00946v3"
       lean: "GNM.count_eq_two_of_add_six"
       module: "Solution"
       status: "proved"

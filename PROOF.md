@@ -21,8 +21,8 @@ theorem of the copied development applies. `GNM.goodPartitions n` is the good pa
 `GNM.count_eq_two_of`, `GNM.count_le_of_injOn` and `GNM.count_le_of_leftInverse`.
 
 The arithmetic of the two sets is also in `GNM/Basic.lean`: they are disjoint
-(`GNM.not_e2_of_nu`); below `250` they are explicit lists (`GNM.nu_iff_of_le`, `GNM.e2_iff_of_le`);
-powers of three are separated (`GNM.pow_three_eq_of_lt`); above the fourth power membership is
+(`GNM.not_e2_of_nu`); up to `250` they are explicit lists (`GNM.nu_iff_of_le`, `GNM.e2_iff_of_le`);
+powers of three are separated (`GNM.pow_three_eq_of_lt`); from the fourth power on membership is
 decided by the offset alone (`GNM.nu_add_iff`, `GNM.not_e2_add`, `GNM.nu_sub_iff`,
 `GNM.e2_sub_iff`); and a member at least `33` is `3^s − e` with `e ∈ {1, 2, 3, 4, 6}` or `3^s + c`
 with `c ∈ {0, 1, 2, 3, 5}`, `s ≥ 4` (`GNM.exceptional_form`).
@@ -39,7 +39,7 @@ and `GNM.differZ` do the same for partitions of a finite set of integers into ze
 `GNM.search` is an exhaustive depth-first search that repeatedly takes the largest uncovered element
 and tries every good block containing it, returning `true` exactly when every partition it reaches
 is one of a prescribed list. Every recursion is an explicit recursor, and the candidate generator
-`GNM.candidates` prunes hard: for a block `{x, a, b}` with `1 ≤ b < a < x` the sum lies strictly
+`GNM.candidates` uses one arithmetic fact: for a block `{x, a, b}` with `1 ≤ b < a < x` the sum lies strictly
 between `x + a` and `x + 2a`, so with the power of three fixed and `a` chosen, `b` is determined.
 
 `GNM/Witness.lean` restates each of those functions in the language of lists and bridges them to the
@@ -57,13 +57,15 @@ a good partition of the rest (`GN.GoodOn.erase`), and the recursive call's verdi
 `GNM.count_eq_one_of_search`, `GNM.count_eq_two_of_search` turn an accepting search with one or two
 listed partitions into the exact count.
 
-The tables are `GNM/Data/BaseWitnesses.lean`: `GNM.baseWitnesses n` for `n ≤ 86`, three partitions
-at every `n ≤ 80` outside the exceptional sets and the complete list at every exceptional `n`.
+The tables are `GNM/Data/BaseWitnesses.lean`: `GNM.baseWitnesses n`: three partitions at every
+`n ≤ 80` outside the exceptional sets, the complete list at every exceptional `n ≤ 80`, and the single
+partition of `{1, …, 86}`; the values `81` to `85` are not tabulated.
 `GNM/SearchFacts.lean` imports no library and holds the kernel facts, each by `decide +kernel`:
 `GNM.allWitnessesOK_true` (every tabulated partition passes the checker), one `GNM.three_ok_n` per
-non-exceptional `n ≤ 80` (three of them good and pairwise different), and, at the twenty values
-`1, …, 14, 21, 23, 30, 32, 75, 86`, one `GNM.search_n` saying that the search accepts the tabulated
-list there.
+non-exceptional `n ≤ 80` (three of them good and pairwise different), one `GNM.one_ok_n` or
+`GNM.two_ok_n` at each of the twenty values `1, …, 14, 21, 23, 30, 32, 75, 86` (the tabulated one or
+two good and, for two, different), and at those twenty values one `GNM.search_n` saying that the
+search accepts the tabulated list there.
 
 `GNM/Base.lean` reads those facts off through the bridges and evaluates nothing:
 `GNM.three_le_count_of_le_80` (three good partitions at every `n ≤ 80` outside the two sets, taken
@@ -95,7 +97,7 @@ displacements with one fixed prefix; nothing about that prefix is used beyond it
 permutation of the initial interval with the small displacements, so `GNM.with_prefix` glues an
 arbitrary prefix and records that the result agrees with the prefix on the prefix positions. Hence
 three prefixes give three permutations (`GNM.threeA_of_pairing`), and with the six Langford families
-of `GN.Universal` the upper-half holes are covered (`GNM.threeA_high`), reflection covers the lower
+(five in `GN/Universal.lean`, the minimal one in `GN/Existence.lean`) the upper-half holes are covered (`GNM.threeA_high`), reflection covers the lower
 half (`GNM.threeA_reflect`), and a strong induction on the length gives `GNM.threeM_all` for every
 `q ≥ 5`, then `GNM.threeA_all` and `GNM.threeDisp_all` for every `k ≥ 4` and every hole.
 
@@ -169,7 +171,7 @@ Counting mass then forces large deficits. For each deficit `d`, the low part of 
 sums to `d`; summing over `d` and comparing with the total mass of the low elements shows that the
 blocks with no high element carry at most `r(r − 1)/2`. A descent on the largest non-canonical
 deficit removes the rest: if the low part of the block of `Q − d` is not the singleton `{d}`, then
-`d` itself sits in a low-only block, too light, or in the block of a larger non-canonical deficit.
+`d` itself sits in a low-only block, whose mass is too small, or in the block of a larger non-canonical deficit.
 This is `GNM.canonical_sub`; `GNM.canonical_add` is the same with the extra step that the elements
 above `P` lie in `3P`-blocks whose offsets cancel, so the deficits those blocks use also sum to
 `r(r + 1)/2`.
@@ -211,10 +213,10 @@ non-canonical deficit (`GNM.three_le_count_sub_above`).
 `GNM/Assembly.lean` puts the regimes together. `GNM.three_le_count_of_not_exceptional` is a strong
 induction on `n`: at `n ≤ 80` it is the finite base; above, `P = 3 ^ Nat.log 3 n` is at least `81`.
 In the positive regime the offset is not in `{0, 1, 2, 3, 5}` (`GNM.nu_add_iff`), so it is four, six,
-eight, or at least seven with a residue the frames cover. In the negative regime the offset is at
-least `5` (`GNM.nu_sub_iff`, `GNM.e2_sub_iff`); if `r − 1` is not exceptional the induction
+eight, or at least seven with a residue the frames cover. In the negative regime the offset `r` is at
+least `5` and not `6` (`GNM.nu_sub_iff`, `GNM.e2_sub_iff`); if `r − 1` is not exceptional the induction
 hypothesis and `GNM.count_pred_le_count_sub` finish; if it is exceptional and `r ≤ 33`, then
-`81 − r` is not exceptional and `GNM.count_sub_le_count_sub` carries the base's three partitions up
+`81 − r` is not exceptional (it would be only at `r = 6`) and `GNM.count_sub_le_count_sub` carries the base's three partitions up
 from `3^4`; and if `r − 1 ≥ 33`, `GNM.exceptional_form` puts `r` in the range of one of the two
 gadgets. `GNM.count_eq_one_of_nu` and `GNM.count_eq_two_of_e2` case on the members of the two sets:
 the finite ones come from `GNM.count_eq_one_small` and `GNM.count_eq_two_small`, and each family

@@ -8,15 +8,18 @@ the number of them.
 Gurvich and Naumova, *Partitioning set [n] = {1, …, n} into subsets of size at most m such that all
 sums are powers of m*, [arXiv:2508.00946v3](https://arxiv.org/abs/2508.00946v3) (v3, July 2026),
 conjecture that a good partition exists for every `n`, prove in their Theorem 3 that it is unique
-exactly on the set `N_u` below, record that there are exactly two at `n = 3^t − 3` and at `n = 13`,
-and conjecture in the same theorem that the number is greater than two at every other `n`. The
-family `n = 3^t − 6` with `t ≥ 3` also has exactly two, so the conjecture as printed does not hold;
-the four theorems here give the complete classification. Write
+for every `n` in the set `N_u` below, record that there are exactly two at `n = 3^t − 3` and at
+`n = 13`, and conjecture, immediately after that theorem, that the number is greater than two at
+every other `n`, reporting a computer check of the conjecture up to `n = 844`. The family
+`n = 3^t − 6` with `t ≥ 3` also has exactly two — its first member `21` lies inside that reported
+range, and the count there is fixed by an exhaustive search checked by Lean's kernel — so the
+conjecture as printed does not hold. The four theorems here give the complete classification; the
+converse of the source's uniqueness statement is proved here as well. Write
 
 - `N_u = {1, 2, 3, 4} ∪ {3^t − 4, 3^t − 2, 3^t − 1, 3^t, 3^t + 1, 3^t + 2, 3^t + 3, 3^t + 5 : t ≥ 2}`,
 - `E_2 = {13} ∪ {3^t − 3 : t ≥ 2} ∪ {3^t − 6 : t ≥ 3}`.
 
-The four theorems, for `n ≥ 1`:
+The four theorems (the first and third for `n ≥ 1`; `count 0 = 1` by the empty partition):
 
 - `count n = 1` if and only if `n ∈ N_u` — `GNM.count_eq_one_iff`;
 - `count n = 2` if and only if `n ∈ E_2` — `GNM.count_eq_two_iff`;
@@ -27,8 +30,8 @@ The lower bounds are three explicit good partitions, built by strong induction o
 base of tabulated partitions at `n ≤ 80` through four transports, each of which keeps a component
 that can be read back off the result: a partition of a smaller interval with a frame of triples
 around a power of three, in a symmetric and in a signed form; the canonical pairs `{d, Q − d}` below
-a power; and a lift from one power to the next. Three distinct frames come from an explicit
-symmetric family with three trades, and from gluing a Langford pairing to an arbitrary prefix
+a power; and a lift from one power to a larger one. Three distinct frames come from an explicit
+symmetric family, its negation and one of three trades, and from gluing a Langford pairing to an arbitrary prefix
 permutation, where three prefixes give three permutations and so three frames. The exact values `1`
 and `2` are exhaustive enumerations at twenty values `n ≤ 86`, checked by the kernel and complete by
 a theorem about the search, carried to every power of three by stabilization: above a threshold every
